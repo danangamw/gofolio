@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"strconv"
 	"time"
@@ -13,7 +14,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 // Service represents a service that interacts with a database.
@@ -33,7 +35,7 @@ type service struct {
 }
 
 var (
-	dbInstance  *service
+	dbInstance *service
 )
 
 func New() Service {
@@ -48,16 +50,30 @@ func New() Service {
 	}
 
 	// Determine GORM log level based on APP_ENV
-	gormLogLevel := logger.Silent
+	gormLogLevel := gormlogger.Silent
 	if os.Getenv("APP_ENV") == "development" {
-		gormLogLevel = logger.Info
+		gormLogLevel = gormlogger.Info
 	}
 
+	// Slow query threshold: queries exceeding this duration will be logged as WARN
+	slowQueryThreshold := 200 * time.Millisecond
+
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
-		Logger: logger.Default.LogMode(gormLogLevel),
+		// Replace the default GORM logger with the slog bridge:
+		// → structured query logs (JSON) + trace_id + sent to Loki
+		Logger: newGormLogger(gormLogLevel, slowQueryThreshold),
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Register GORM OTel plugin:
+	// → each query automatically becomes a child span in Grafana Tempo
+	// → span includes: table name, SQL operation, duration, error (if any)
+	if err := db.Use(tracing.NewPlugin(
+		tracing.WithoutMetrics(),
+	)); err != nil {
+		slog.Warn("failed to register gorm otel tracing plugin", "error", err)
 	}
 
 	sqlDB, err := db.DB()

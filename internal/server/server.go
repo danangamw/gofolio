@@ -9,19 +9,23 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"go-cms/internal/config"
 	"go-cms/internal/database"
 )
 
 type Server struct {
-	port int
+	port        int
+	serviceName string
 
 	db database.Service
 }
 
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	cfg := config.Load()
+	port, _ := strconv.Atoi(os.Getenv("APP_PORT"))
 	NewServer := &Server{
-		port: port,
+		port:        port,
+		serviceName: cfg.ServiceName,
 
 		db: database.New(),
 	}

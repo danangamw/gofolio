@@ -8,16 +8,26 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+
+	cmsmiddleware "go-cms/internal/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+
+	// Recoverer catches panics and returns 500 without crashing
+	r.Use(middleware.Recoverer)
+	// RequestID injects a unique ID into every request for internal tracing
+	r.Use(middleware.RequestID)
+	// OtelHTTP: auto-instrument spans + metrics for each request
+	r.Use(cmsmiddleware.OtelHTTP(s.serviceName))
+	// Inject X-Trace-ID into the response header so the client can trace it in Grafana
+	r.Use(cmsmiddleware.TraceIDHeader)
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Trace-ID"},
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))

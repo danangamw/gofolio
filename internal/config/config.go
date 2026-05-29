@@ -25,6 +25,12 @@ type Config struct {
 
 	AdminUsername string
 	AdminPassword string
+
+	// Telemetry / Observability
+	ServiceName    string // Service name displayed in Grafana (default: "go-cms")
+	ServiceVersion string // Service version, ideally from git tag (default: "dev")
+	OTLPEndpoint   string // Grafana Alloy address: "host:4317" (default: "localhost:4317")
+	LogLevel       string // "debug" | "info" | "warn" | "error" (default: "info")
 }
 
 // Load reads environment variables and returns a populated Config struct.
@@ -51,6 +57,12 @@ func Load() *Config {
 
 		AdminUsername: os.Getenv("ADMIN_USERNAME"),
 		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+
+		// Telemetry
+		ServiceName:    getEnv("SERVICE_NAME", "go-cms"),
+		ServiceVersion: getEnv("SERVICE_VERSION", "dev"),
+		OTLPEndpoint:   getEnv("OTLP_ENDPOINT", "localhost:4317"),
+		LogLevel:       getEnv("LOG_LEVEL", "info"),
 	}
 }
 
