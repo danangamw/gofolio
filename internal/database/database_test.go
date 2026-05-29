@@ -2,9 +2,7 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -35,6 +33,10 @@ func mustStartPostgresContainer() (func(context.Context, ...testcontainers.Termi
 		return nil, err
 	}
 
+	database = dbName
+	password = dbPwd
+	username = dbUser
+
 	dbHost, err := dbContainer.Host(context.Background())
 	if err != nil {
 		return dbContainer.Terminate, err
@@ -45,10 +47,10 @@ func mustStartPostgresContainer() (func(context.Context, ...testcontainers.Termi
 		return dbContainer.Terminate, err
 	}
 
-	testConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPwd, dbHost, dbPort.Port(), dbName)
-	os.Setenv("DATABASE_URL", testConnStr)
+	host = dbHost
+	port = dbPort.Port()
 
-	return dbContainer.Terminate, nil
+	return dbContainer.Terminate, err
 }
 
 func TestMain(m *testing.M) {
