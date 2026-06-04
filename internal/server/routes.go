@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// RequestID injects a unique ID into every request for internal tracing
 	r.Use(middleware.RequestID)
 	// OtelHTTP: auto-instrument spans + metrics for each request
-	r.Use(cmsmiddleware.OtelHTTP(s.serviceName))
+	r.Use(cmsmiddleware.OtelHTTP(s.cfg.ServiceName))
 	// Inject X-Trace-ID into the response header so the client can trace it in Grafana
 	r.Use(cmsmiddleware.TraceIDHeader)
 

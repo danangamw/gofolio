@@ -1,10 +1,9 @@
 package server
 
 import (
+	"embed"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -14,30 +13,23 @@ import (
 )
 
 type Server struct {
-	port        int
-	serviceName string
-
-	db database.Service
+	cfg   *config.Config
+	db    database.Service
+	webFs embed.FS
 }
 
-func NewServer() *http.Server {
-	cfg := config.Load()
-	port, _ := strconv.Atoi(os.Getenv("APP_PORT"))
-	NewServer := &Server{
-		port:        port,
-		serviceName: cfg.ServiceName,
-
-		db: database.New(),
+func NewServer(cfg *config.Config, db database.Service, webFs embed.FS) *http.Server {
+	s := &Server{
+		cfg:   cfg,
+		db:    db,
+		webFs: webFs,
 	}
 
-	// Declare Server config
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+	return &http.Server{
+		Addr:         fmt.Sprintf(":%s", cfg.AppPort),
+		Handler:      s.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-
-	return server
 }

@@ -3,17 +3,21 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 // Config holds all runtime configuration loaded from environment variables.
 type Config struct {
-	AppEnv    string
-	AppPort   string
-	SecretKey string
+	AppEnv        string
+	AppPort       string
+	SecretKey     string
+	AppAutoMigrate bool // run GORM AutoMigrate on startup (development only)
 
-	DatabaseURL string
+	DatabaseURL    string
+	DBMaxIdleConns int // default: 10
+	DBMaxOpenConns int // default: 100
 
 	RedisURL string
 
@@ -41,11 +45,14 @@ func Load() *Config {
 	}
 
 	return &Config{
-		AppEnv:    getEnv("APP_ENV", "development"),
-		AppPort:   getEnv("APP_PORT", "8080"),
-		SecretKey: secretKey,
+		AppEnv:         getEnv("APP_ENV", "development"),
+		AppPort:        getEnv("APP_PORT", "8080"),
+		SecretKey:      secretKey,
+		AppAutoMigrate: os.Getenv("APP_AUTO_MIGRATE") == "true",
 
-		DatabaseURL: requireEnv("DATABASE_URL"),
+		DatabaseURL:    requireEnv("DATABASE_URL"),
+		DBMaxIdleConns: getEnvInt("DB_MAX_IDLE_CONNS", 10),
+		DBMaxOpenConns: getEnvInt("DB_MAX_OPEN_CONNS", 100),
 
 		RedisURL: os.Getenv("REDIS_URL"), // optional
 
@@ -79,4 +86,11 @@ func requireEnv(key string) string {
 		log.Fatalf("required environment variable %q is not set", key)
 	}
 	return v
+}
+
+func getEnvInt(key string, fallback int) int {
+	if v, err := strconv.Atoi(os.Getenv(key)); err == nil && v > 0 {
+		return v
+	}
+	return fallback
 }

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"os"
 	"strconv"
 	"time"
 
+	"go-cms/internal/config"
 	"go-cms/internal/model"
 
-	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -38,33 +37,57 @@ var (
 	dbInstance *service
 )
 
-func New() Service {
+func New(cfg *config.Config) Service {
 	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
 	}
 
-	connStr := os.Getenv("DATABASE_URL")
-	if connStr == "" {
-		log.Fatal("DATABASE_URL environment variable is required but not set")
-	}
-
 	// Determine GORM log level based on APP_ENV
 	gormLogLevel := gormlogger.Silent
-	if os.Getenv("APP_ENV") == "development" {
+	if cfg.AppEnv == "development" {
 		gormLogLevel = gormlogger.Info
 	}
 
 	// Slow query threshold: queries exceeding this duration will be logged as WARN
 	slowQueryThreshold := 200 * time.Millisecond
 
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
+	gormCfg := &gorm.Config{
 		// Replace the default GORM logger with the slog bridge:
 		// → structured query logs (JSON) + trace_id + sent to Loki
 		Logger: newGormLogger(gormLogLevel, slowQueryThreshold),
-	})
+	}
+
+	// Retry loop: attempt to connect up to maxDBRetries times.
+	// Useful when the app starts before the DB container is fully ready.
+	const (
+		maxDBRetries = 10
+		retryDelay   = 3 * time.Second
+	)
+
+	var (
+		db  *gorm.DB
+		err error
+	)
+	for attempt := 0; attempt < maxDBRetries; attempt++ {
+		db, err = gorm.Open(postgres.Open(cfg.DatabaseURL), gormCfg)
+		if err == nil {
+			break
+		}
+
+		if attempt == 0 {
+			log.Printf("CONNECT failed (%v): %v", err, cfg.DatabaseURL)
+		} else {
+			log.Printf("RECONNECT(%d) failed (%v): %v", attempt, err, cfg.DatabaseURL)
+		}
+
+		if attempt < maxDBRetries-1 {
+			log.Printf("Retrying in %s... (%d/%d)", retryDelay, attempt+1, maxDBRetries)
+			time.Sleep(retryDelay)
+		}
+	}
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to connect to database after %d attempts: %v", maxDBRetries, err)
 	}
 
 	// Register GORM OTel plugin:
@@ -81,15 +104,15 @@ func New() Service {
 		log.Fatalf("Failed to retrieve generic database object: %v", err)
 	}
 
-	// Connection Pooling Settings
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
+	// Connection Pooling Settings — sourced from config (reads DB_MAX_IDLE_CONNS / DB_MAX_OPEN_CONNS env).
+	sqlDB.SetMaxIdleConns(cfg.DBMaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.DBMaxOpenConns)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	log.Println("Database connection established successfully with GORM")
 
 	// Run GORM AutoMigrate if configured (Optional, usually for dev)
-	if os.Getenv("APP_AUTO_MIGRATE") == "true" {
+	if cfg.AppEnv == "development" && cfg.AppAutoMigrate {
 		log.Println("Running GORM auto-migrations...")
 		err = db.AutoMigrate(&model.User{}, &model.Blog{}, &model.Portfolio{}, &model.Session{})
 		if err != nil {

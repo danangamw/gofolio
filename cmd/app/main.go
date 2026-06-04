@@ -9,7 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	gocms "go-cms"
+	"go-cms/internal/config"
+	"go-cms/internal/database"
 	"go-cms/internal/server"
+	"go-cms/pkg/logger"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -31,16 +35,25 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	done <- true
 }
 
+// webFS is defined in the root package (web.go) next to the web/ directory.
+
 func main() {
-	server := server.NewServer()
+
+	cfg := config.Load()
+
+	db := database.New(cfg)
+	defer db.Close()
+
+	srv := server.NewServer(cfg, db, gocms.WebFS)
 
 	done := make(chan bool, 1)
 
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(srv, done)
 
-	err := server.ListenAndServe()
+	logger.Info(context.Background(), "Server running on :%s (env: %s)", cfg.AppPort, cfg.AppEnv)
+	err := srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		panic(fmt.Sprintf("http server error: %s", err))
+		panic(fmt.Sprintf("server error: %s", err))
 	}
 
 	<-done

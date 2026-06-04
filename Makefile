@@ -5,13 +5,11 @@ all: build test
 
 build:
 	@echo "Building..."
-	
-	
-	@go build -o main cmd/app/main.go
+	@CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/go-cms ./cmd/api
 
-# Run the application
+# Run the application (with hot-reload via air)
 run:
-	@go run cmd/app/main.go
+	@if command -v air > /dev/null; then air; else go run ./cmd/api; fi
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -42,7 +40,7 @@ itest:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -rf bin/
 
 # Live Reload
 watch:
@@ -61,4 +59,35 @@ watch:
             fi; \
         fi
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest seed migrate-diff migrate-apply migrate-status migrate-lint
+
+# Seed admin user
+seed:
+	@go run ./cmd/seed
+
+# ─── DATABASE MIGRATIONS (ATLAS) ─────────────────────────────────────────────
+# Atlas reads GORM models via cmd/migrate/loader.go and generates versioned SQL
+# files into the migrations/ directory.
+
+# Generate a new migration file from GORM model changes.
+# Usage: make migrate-diff name=add_tags_to_blogs
+migrate-diff:
+	@atlas migrate diff $(name) --env local
+
+# Apply pending migrations to the local database.
+migrate-apply:
+	@atlas migrate apply --env local --url "$(shell grep DATABASE_URL .env | cut -d= -f2-)"
+
+# Show current migration status.
+migrate-status:
+	@atlas migrate status --env local --url "$(shell grep DATABASE_URL .env | cut -d= -f2-)"
+
+# Lint migration files for safety issues.
+migrate-lint:
+	@atlas migrate lint --env local --git-base main
+
+# Apply migrations to PRODUCTION (requires DATABASE_URL env var).
+migrate-prod:
+	@atlas migrate apply \
+	  --dir "file://migrations" \
+	  --url "$(DATABASE_URL)"
