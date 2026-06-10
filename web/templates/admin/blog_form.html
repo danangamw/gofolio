@@ -1,3 +1,74 @@
 {{ define "content" }}
-<!-- TODO: admin blog_form page content -->
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+<div class="admin-form-container">
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 2rem;">
+        <div class="admin-breadcrumb">
+            <a href="/admin">Dashboard</a>
+            <span>/</span>
+            <a href="/admin/blogs">Articles</a>
+            <span>/</span>
+            <span style="color: var(--foreground); font-weight: 500;">{{ if .IsEdit }}Edit{{ else }}New{{ end }}</span>
+        </div>
+        <h1 class="admin-header-title" style="font-size: 2rem;">{{ if .IsEdit }}Edit Article{{ else }}Create New Article{{ end }}</h1>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card admin-form-card">
+        <form action="{{ if .IsEdit }}/admin/blogs/edit/{{ .Blog.Slug }}{{ else }}/admin/blogs/new{{ end }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+
+            <!-- Title & Slug Grid -->
+            <div class="form-group">
+                <label class="form-label" for="title">Title</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Advanced Dependency Injection in Go" value="{{ if .IsEdit }}{{ .Blog.Title }}{{ end }}" required>
+            </div>
+
+            <!-- Category & Date Grid -->
+            <div class="form-grid-2">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="category">Category</label>
+                    <input type="text" id="category" name="category" class="form-control" placeholder="e.g. Go, Database, Cloud" value="{{ if .IsEdit }}{{ .Blog.Category }}{{ end }}" required>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="date">Publish Date</label>
+                    <input type="text" id="date" name="date" class="form-control" placeholder="e.g. June 10, 2026" value="{{ if .IsEdit }}{{ .Blog.Date }}{{ end }}" required>
+                </div>
+            </div>
+
+            <!-- Excerpt -->
+            <div class="form-group">
+                <label class="form-label" for="excerpt">Excerpt / Summary</label>
+                <textarea id="excerpt" name="excerpt" rows="2" class="form-control" style="resize: vertical;" placeholder="Brief summary of the article..." required>{{ if .IsEdit }}{{ .Blog.Excerpt }}{{ end }}</textarea>
+            </div>
+
+            <!-- HTML Content -->
+            <div class="form-group">
+                <label class="form-label" for="content">Article Content (Markdown)</label>
+                <textarea id="content" name="content" class="form-control" placeholder="Write your article here..." required>{{ if .IsEdit }}{{ .Blog.HTMLContent }}{{ end }}</textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="/admin/blogs" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ if .IsEdit }}Save Changes{{ else }}Publish Article{{ end }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const easymde = new EasyMDE({
+        element: document.getElementById('content'),
+        spellChecker: false,
+        placeholder: "Write your article in Markdown (support images: ![alt](url) and code snippets)...",
+        status: ["words", "lines"],
+        renderingConfig: {
+            singleLineBreaks: false,
+            codeSyntaxHighlighting: true,
+        },
+    });
+</script>
 {{ end }}

@@ -1,29 +1,15 @@
 {{ define "content" }}
 <div class="container" style="padding-bottom: 5rem;">
     <!-- Page Header -->
-    <header style="padding: 4rem 0 3rem; max-width: 700px;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 1rem;">About Me</h1>
-        <p style="font-size: 1.125rem; color: var(--muted-foreground); line-height: 1.6;">
+    <header class="page-header">
+        <h1 class="page-title">About Me</h1>
+        <p class="page-subtitle">
             Get to know me better, my background, technical expertise, and what I enjoy doing.
         </p>
     </header>
 
-    <div style="display: grid; grid-template-columns: 1fr; gap: 4rem; align-items: start; margin-top: 1rem;">
-        <!-- Layout Split: 768px+ -->
-        <style>
-            .about-grid {
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-            @media (min-width: 768px) {
-                .about-grid {
-                    grid-template-columns: 2fr 1fr;
-                }
-            }
-        </style>
-
-        <div class="about-grid">
+    <div style="margin-top: 1rem;">
+        <div class="about-split-grid">
             <!-- Biography (Left Column) -->
             <div class="prose" style="max-width: 100%; font-size: 1.05rem;">
                 <h2>Who am I?</h2>
@@ -35,22 +21,22 @@
                 </p>
 
                 <h2 style="margin-top: 2rem;">Work Experience</h2>
-                <div style="border-left: 2px solid var(--border); padding-left: 1.5rem; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 2rem;">
+                <div class="about-experience-timeline">
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                        <div class="about-experience-header">
                             <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Senior Backend Engineer</h3>
                             <span class="badge" style="font-size: 0.75rem;">2024 - Present</span>
                         </div>
-                        <div style="color: var(--primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">TechCorp Indonesia</div>
+                        <div class="about-experience-company">TechCorp Indonesia</div>
                         <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">Designed and migrated monolithic architectures to Go-based microservices, reducing API latency by 40% and handling high-throughput workloads.</p>
                     </div>
 
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                        <div class="about-experience-header">
                             <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Software Engineer (Backend)</h3>
                             <span class="badge" style="font-size: 0.75rem;">2022 - 2024</span>
                         </div>
-                        <div style="color: var(--primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">Startup Hub</div>
+                        <div class="about-experience-company">Startup Hub</div>
                         <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">Built RESTful APIs with Gin & GORM, integrated third-party payment gateways, and optimized PostgreSQL queries.</p>
                     </div>
                 </div>
@@ -59,10 +45,8 @@
             <!-- Profile & Skills (Right Column) -->
             <div style="display: flex; flex-direction: column; gap: 2.5rem;">
                 <!-- Profile Card -->
-                <div class="card" style="padding: 2rem; align-items: center; text-align: center;">
-                    <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), oklch(0.65 0.25 350)); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; box-shadow: var(--shadow-md);">
-                        D
-                    </div>
+                <div class="card about-profile-card">
+                    <div class="about-profile-avatar">D</div>
                     <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">Danang</h3>
                     <p style="font-size: 0.9rem; color: var(--muted-foreground); margin-bottom: 1.5rem;">Backend Developer</p>
                     <div style="display: flex; justify-content: center; gap: 1rem; width: 100%;">
@@ -74,16 +58,16 @@
                 <!-- Tech Stack & Skills -->
                 <div>
                     <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">Technical Skills</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">Go (Golang)</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">PostgreSQL</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">Redis</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">Docker</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">Kubernetes</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">gRPC / Protobuf</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">GraphQL</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">Git</span>
-                        <span class="badge" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 600;">HTML / CSS</span>
+                    <div class="about-skills-container">
+                        <span class="badge about-skill-badge">Go (Golang)</span>
+                        <span class="badge about-skill-badge">PostgreSQL</span>
+                        <span class="badge about-skill-badge">Redis</span>
+                        <span class="badge about-skill-badge">Docker</span>
+                        <span class="badge about-skill-badge">Kubernetes</span>
+                        <span class="badge about-skill-badge">gRPC / Protobuf</span>
+                        <span class="badge about-skill-badge">GraphQL</span>
+                        <span class="badge about-skill-badge">Git</span>
+                        <span class="badge about-skill-badge">HTML / CSS</span>
                     </div>
                 </div>
             </div>

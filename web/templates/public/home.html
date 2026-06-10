@@ -1,17 +1,17 @@
 {{ define "content" }}
 <div class="container" style="padding-bottom: 5rem;">
     <!-- Hero Section -->
-    <section class="hero-section" style="padding: 4rem 0 6rem; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; max-width: 800px;">
-        <span class="badge" style="margin-bottom: 1rem; padding: 0.35rem 0.85rem; font-size: 0.8rem; background-color: color-mix(in oklch, var(--primary) 10%, transparent); color: var(--primary); border-color: color-mix(in oklch, var(--primary) 20%, transparent);">
+    <section class="hero-section">
+        <span class="badge hero-badge">
             👋 Welcome to my portfolio
         </span>
-        <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
-            Building <span style="background: linear-gradient(135deg, var(--primary), oklch(0.65 0.25 350)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Fast & Reliable</span> Web Apps with Go.
+        <h1 class="hero-title">
+            Building <span>Fast & Reliable</span> Web Apps with Go.
         </h1>
-        <p style="font-size: clamp(1.1rem, 2vw, 1.25rem); color: var(--muted-foreground); line-height: 1.6; margin-bottom: 2.5rem; max-width: 650px;">
+        <p class="hero-subtitle">
             I'm a Backend Engineer focused on performance, scalability, and clean code architecture. Let's build something amazing together.
         </p>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div class="hero-buttons">
             <a href="/portfolio" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.5rem;">View Portfolio</a>
             <a href="/about" class="btn btn-outline" style="font-size: 1rem; padding: 0.75rem 1.5rem;">About Me</a>
         </div>
@@ -19,10 +19,10 @@
 
     <!-- Featured Projects Section -->
     <section style="margin-bottom: 6rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+        <div class="section-header">
             <div>
-                <h2 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem;">Featured Projects</h2>
-                <p style="color: var(--muted-foreground);">A curated selection of applications and systems I've built.</p>
+                <h2 class="section-title">Featured Projects</h2>
+                <p class="section-subtitle">A curated selection of applications and systems I've built.</p>
             </div>
             <a href="/portfolio" class="btn btn-ghost btn-sm" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
                 All Projects
@@ -33,21 +33,21 @@
         <div class="grid-3">
             {{ range .FeaturedPortfolios }}
             <div class="card">
-                <div class="card-media" style="background: linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, var(--background)), color-mix(in oklch, var(--primary) 5%, var(--background))); height: 180px; position: relative;">
-                    <div style="position: absolute; font-size: 3rem;">{{ .Icon }}</div>
+                <div class="card-media card-media-default">
+                    <div class="card-media-icon">{{ .Icon }}</div>
                 </div>
                 <div class="card-header">
                     <h3 class="card-title">{{ .Title }}</h3>
                     <p class="card-description">{{ .Description }}</p>
                 </div>
                 <div class="card-content">
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+                    <div class="card-tech-container">
                         {{ range .TechStack }}
-                        <span class="badge" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">{{ . }}</span>
+                        <span class="badge card-tech-badge">{{ . }}</span>
                         {{ end }}
                     </div>
                 </div>
-                <div class="card-footer" style="border-top: 1px solid var(--border); margin-top: 1rem;">
+                <div class="card-footer card-footer-action">
                     {{ if .ProjectURL }}
                     <a href="{{ .ProjectURL }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">Demo</a>
                     {{ end }}
@@ -62,10 +62,10 @@
 
     <!-- Latest Blog Posts Section -->
     <section>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+        <div class="section-header">
             <div>
-                <h2 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem;">Latest Articles</h2>
-                <p style="color: var(--muted-foreground);">Sharing insights about Go programming and web development.</p>
+                <h2 class="section-title">Latest Articles</h2>
+                <p class="section-subtitle">Sharing insights about Go programming and web development.</p>
             </div>
             <a href="/blog" class="btn btn-ghost btn-sm" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
                 All Articles
@@ -77,18 +77,18 @@
             {{ range .LatestBlogs }}
             <div class="card">
                 <div class="card-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <span class="badge" style="background-color: color-mix(in oklch, var(--primary) 8%, transparent); color: var(--primary); border: none;">{{ .Category }}</span>
-                        <time style="font-size: 0.8rem; color: var(--muted-foreground);">{{ .Date }}</time>
+                    <div class="blog-meta-container">
+                        <span class="badge blog-category-badge">{{ .Category }}</span>
+                        <time class="blog-date-text">{{ .Date }}</time>
                     </div>
                     <h3 class="card-title" style="font-size: 1.25rem;">
-                        <a href="/blog/{{ .Slug }}" style="color: inherit; text-decoration: none;">{{ .Title }}</a>
+                        <a href="/blog/{{ .Slug }}" class="blog-title-link">{{ .Title }}</a>
                     </h3>
-                    <p class="card-description" style="-webkit-line-clamp: 3; margin-top: 0.5rem;">{{ .Excerpt }}</p>
+                    <p class="card-description blog-excerpt-text">{{ .Excerpt }}</p>
                 </div>
                 <div class="card-content"></div>
                 <div class="card-footer" style="margin-top: auto;">
-                    <a href="/blog/{{ .Slug }}" class="btn btn-ghost btn-sm" style="padding-left: 0; color: var(--primary); font-weight: 600;">
+                    <a href="/blog/{{ .Slug }}" class="btn btn-ghost btn-sm blog-read-more-btn">
                         Read More
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 0.2rem;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>

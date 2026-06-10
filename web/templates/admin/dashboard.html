@@ -1,3 +1,84 @@
 {{ define "content" }}
-<!-- TODO: admin dashboard page content -->
+<div class="admin-container">
+    <!-- Welcome Header -->
+    <div class="admin-header">
+        <div>
+            <h1 class="admin-header-title">Admin Dashboard</h1>
+            <p class="admin-header-subtitle">Welcome back! Here's an overview of your portfolio & blog content.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="/admin/blogs/new" class="btn btn-primary btn-sm">Add Blog Post</a>
+            <a href="/admin/portfolios/new" class="btn btn-outline btn-sm">Add Portfolio</a>
+        </div>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="stats-grid">
+        <div class="card stat-card">
+            <div class="stat-card-icon">📝</div>
+            <div>
+                <div class="stat-card-label">Total Articles</div>
+                <div class="stat-card-value">{{ .Stats.BlogCount }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-card-icon">💼</div>
+            <div>
+                <div class="stat-card-label">Portfolios</div>
+                <div class="stat-card-value">{{ .Stats.PortfolioCount }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-card-icon">🔥</div>
+            <div>
+                <div class="stat-card-label">Total Views</div>
+                <div class="stat-card-value">1,420</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout Split -->
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+        <!-- Recent Blog Posts -->
+        <div class="card admin-form-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1.2rem; font-weight: 800;">Recent Articles</h3>
+                <a href="/admin/blogs" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600;">Manage All</a>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range .RecentBlogs }}
+                        <tr>
+                            <td style="font-weight: 600; color: var(--foreground);">{{ .Title }}</td>
+                            <td><span class="badge">{{ .Category }}</span></td>
+                            <td style="color: var(--muted-foreground); font-size: 0.9rem;">{{ .Date }}</td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <a href="/admin/blogs/edit/{{ .Slug }}" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {{ else }}
+                        <tr>
+                            <td colspan="4" style="padding: 2rem; text-align: center; color: var(--muted-foreground);">No articles found.</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {{ end }}

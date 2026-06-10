@@ -1,3 +1,50 @@
 {{ define "content" }}
-<!-- TODO: admin blog_list page content -->
+<div class="admin-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div>
+            <h1 class="admin-header-title">Manage Articles</h1>
+            <p class="admin-header-subtitle">Create, edit, and manage your blog posts.</p>
+        </div>
+        <a href="/admin/blogs/new" class="btn btn-primary">Add Blog Post</a>
+    </div>
+
+    <!-- Blog Posts Card/Table -->
+    <div class="card admin-form-card">
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Blogs }}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--foreground);">{{ .Title }}</td>
+                        <td><span class="badge">{{ .Category }}</span></td>
+                        <td style="color: var(--muted-foreground); font-size: 0.9rem;">{{ .Date }}</td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <a href="/admin/blogs/edit/{{ .Slug }}" class="btn btn-outline btn-sm">Edit</a>
+                                <form action="/admin/blogs/delete/{{ .Slug }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--destructive); border-color: color-mix(in oklch, var(--destructive) 20%, var(--border));">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="4" style="padding: 2rem; text-align: center; color: var(--muted-foreground);">No articles found.</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {{ end }}

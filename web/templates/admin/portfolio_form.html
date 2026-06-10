@@ -1,3 +1,79 @@
 {{ define "content" }}
-<!-- TODO: admin portfolio_form page content -->
+<link class="editor-style" rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+<div class="admin-form-container">
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 2rem;">
+        <div class="admin-breadcrumb">
+            <a href="/admin">Dashboard</a>
+            <span>/</span>
+            <a href="/admin/portfolios">Portfolio</a>
+            <span>/</span>
+            <span style="color: var(--foreground); font-weight: 500;">{{ if .IsEdit }}Edit{{ else }}New{{ end }}</span>
+        </div>
+        <h1 class="admin-header-title" style="font-size: 2rem;">{{ if .IsEdit }}Edit Project{{ else }}Create New Project{{ end }}</h1>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card admin-form-card">
+        <form action="{{ if .IsEdit }}/admin/portfolios/edit/{{ .Portfolio.Title }}{{ else }}/admin/portfolios/new{{ end }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+
+            <!-- Title & Icon Grid -->
+            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="title">Project Name</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Realtime Chat App" value="{{ if .IsEdit }}{{ .Portfolio.Title }}{{ end }}" required>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="icon">Icon (Emoji)</label>
+                    <input type="text" id="icon" name="icon" class="form-control" placeholder="e.g. 💬" value="{{ if .IsEdit }}{{ .Portfolio.Icon }}{{ end }}" required>
+                </div>
+            </div>
+
+            <!-- Tech Stack -->
+            <div class="form-group">
+                <label class="form-label" for="tech_stack">Tech Stack (comma-separated)</label>
+                <input type="text" id="tech_stack" name="tech_stack" class="form-control" placeholder="e.g. Go, React, PostgreSQL, Redis" value="{{ if .IsEdit }}{{ .TechStackString }}{{ end }}" required>
+            </div>
+
+            <!-- Demo & Repo URL Grid -->
+            <div class="form-grid-2">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="project_url">Demo URL (Optional)</label>
+                    <input type="url" id="project_url" name="project_url" class="form-control" placeholder="e.g. https://my-app.com" value="{{ if .IsEdit }}{{ .Portfolio.ProjectURL }}{{ end }}">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="repository_url">Repository URL (Optional)</label>
+                    <input type="url" id="repository_url" name="repository_url" class="form-control" placeholder="e.g. https://github.com/me/my-app" value="{{ if .IsEdit }}{{ .Portfolio.RepositoryURL }}{{ end }}">
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label" for="description">Description (Markdown)</label>
+                <textarea id="description" name="description" class="form-control" placeholder="Brief description of the project..." required>{{ if .IsEdit }}{{ .Portfolio.Description }}{{ end }}</textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="/admin/portfolios" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ if .IsEdit }}Save Changes{{ else }}Save Project{{ end }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const easymde = new EasyMDE({
+        element: document.getElementById('description'),
+        spellChecker: false,
+        placeholder: "Write your project description in Markdown...",
+        status: ["words", "lines"],
+        renderingConfig: {
+            singleLineBreaks: false,
+        },
+    });
+</script>
 {{ end }}

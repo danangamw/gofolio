@@ -1,6 +1,6 @@
 {{ define "content" }}
-<div class="flex-center" style="min-height: calc(100vh - 22rem); padding: 2rem 1rem;">
-    <div style="width:100%;max-width:400px;">
+<div class="login-container">
+    <div class="login-form-wrapper">
         <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:1.5rem;text-align:center;">Login</h1>
         {{ if .Error }}<p style="color:var(--destructive);margin-bottom:1rem;text-align:center;">{{ .Error }}</p>{{ end }}
         <form action="/login" method="POST">
@@ -13,7 +13,7 @@
                 <label class="form-label" for="password">Password</label>
                 <input class="form-control" type="password" id="password" name="password" required>
             </div>
-            <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;" type="submit">Masuk</button>
+            <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;" type="submit">Sign In</button>
         </form>
     </div>
 </div>

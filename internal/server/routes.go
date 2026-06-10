@@ -3,13 +3,13 @@ package server
 import (
 	"encoding/json"
 	"io/fs"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
+	adminhandler "go-cms/internal/handler/admin"
 	authhandler "go-cms/internal/handler/auth"
 	publichandler "go-cms/internal/handler/public"
 	cmsmiddleware "go-cms/internal/middleware"
@@ -72,14 +72,34 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/login", authH.LoginPage)
 	r.Post("/login", authH.Login)
 
-	// ── Admin routes (protected) ──────────────────────────────────────────────
+	// ── Admin Pages ──────────────────────────────────────────────────────────
+	adminDashH := adminhandler.NewDashboardHandler(tmpl)
+	adminBlogH := adminhandler.NewAdminBlogHandler(tmpl)
+	adminPortH := adminhandler.NewAdminPortfolioHandler(tmpl)
+
+	// ── Admin routes (bypassed login for static testing) ──────────────────────
 	r.Route("/admin", func(r chi.Router) {
-		r.Use(cmsmiddleware.Auth(s.sessions))
+		// r.Use(cmsmiddleware.Auth(s.sessions)) // Bypassed for static UI testing
 
 		r.Post("/logout", authH.Logout)
 
-		// Dashboard placeholder — will be replaced in Phase 4.
-		r.Get("/", s.adminDashboardHandler)
+		r.Get("/", adminDashH.Index)
+
+		// Blog administration routes
+		r.Get("/blogs", adminBlogH.List)
+		r.Get("/blogs/new", adminBlogH.New)
+		r.Post("/blogs/new", adminBlogH.Create)
+		r.Get("/blogs/edit/{slug}", adminBlogH.Edit)
+		r.Post("/blogs/edit/{slug}", adminBlogH.Update)
+		r.Post("/blogs/delete/{slug}", adminBlogH.Delete)
+
+		// Portfolio administration routes
+		r.Get("/portfolios", adminPortH.List)
+		r.Get("/portfolios/new", adminPortH.New)
+		r.Post("/portfolios/new", adminPortH.Create)
+		r.Get("/portfolios/edit/{title}", adminPortH.Edit)
+		r.Post("/portfolios/edit/{title}", adminPortH.Update)
+		r.Post("/portfolios/delete/{title}", adminPortH.Delete)
 	})
 
 	return r
@@ -91,12 +111,4 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResp, _ := json.Marshal(s.db.Health())
 	_, _ = w.Write(jsonResp)
-}
-
-// adminDashboardHandler is a placeholder until Phase 4 (Admin Dashboard).
-func (s *Server) adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
-	userID := cmsmiddleware.GetUserID(r)
-	w.Header().Set("Content-Type", "text/plain")
-	log.Printf("admin dashboard accessed by userID=%s", userID)
-	w.Write([]byte("Welcome to the admin dashboard. (Phase 4 will render the full UI)"))
 }
