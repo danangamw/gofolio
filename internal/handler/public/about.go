@@ -1,13 +1,26 @@
 package public
 
-import "net/http"
+import (
+	"net/http"
+)
 
-type AboutHandler struct{}
+type Renderer interface {
+	Render(w http.ResponseWriter, name string, data any)
+}
 
-func NewAboutHandler() *AboutHandler {
-	return &AboutHandler{}
+type AboutHandler struct {
+	tmpl Renderer
+}
+
+func NewAboutHandler(tmpl Renderer) *AboutHandler {
+	return &AboutHandler{tmpl: tmpl}
 }
 
 func (h *AboutHandler) Index(w http.ResponseWriter, r *http.Request) {
-	// TODO: render about.html template
+	data := map[string]any{
+		"Title":      "Tentang Saya — Danang",
+		"ActiveMenu": "about",
+	}
+
+	h.tmpl.Render(w, "about", data)
 }

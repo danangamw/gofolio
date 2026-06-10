@@ -1,3 +1,41 @@
 {{ define "content" }}
-<!-- TODO: portfolio page content -->
+<div class="container" style="padding-bottom: 5rem;">
+    <!-- Page Header -->
+    <header style="padding: 4rem 0 3rem; max-width: 700px;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 1rem;">Portfolio</h1>
+        <p style="font-size: 1.125rem; color: var(--muted-foreground); line-height: 1.6;">
+            A collection of projects, experiments, and applications I've built throughout my career as a developer.
+        </p>
+    </header>
+
+    <!-- Grid Layout -->
+    <div class="grid-3">
+        {{ range .Portfolios }}
+        <div class="card">
+            <div class="card-media" style="background: linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, var(--background)), color-mix(in oklch, var(--primary) 5%, var(--background))); height: 180px; position: relative;">
+                <div style="position: absolute; font-size: 3rem;">{{ .Icon }}</div>
+            </div>
+            <div class="card-header">
+                <h3 class="card-title">{{ .Title }}</h3>
+                <p class="card-description">{{ .Description }}</p>
+            </div>
+            <div class="card-content">
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+                    {{ range .TechStack }}
+                    <span class="badge" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">{{ . }}</span>
+                    {{ end }}
+                </div>
+            </div>
+            <div class="card-footer" style="border-top: 1px solid var(--border); margin-top: 1rem;">
+                {{ if .ProjectURL }}
+                <a href="{{ .ProjectURL }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">Demo</a>
+                {{ end }}
+                {{ if .RepositoryURL }}
+                <a href="{{ .RepositoryURL }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="flex: 1;">Repo</a>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
 {{ end }}

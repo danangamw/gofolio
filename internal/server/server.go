@@ -3,7 +3,6 @@ package server
 import (
 	"embed"
 	"fmt"
-	"html/template"
 	"net/http"
 	"time"
 
@@ -22,7 +21,7 @@ type Server struct {
 	webFs    embed.FS
 	sessions session.Store
 	userRepo *repository.UserRepository
-	tmpl     *template.Template // parsed once at startup
+	tmpl     *TemplateRegistry // parsed once at startup
 }
 
 // NewServer wires all dependencies and returns a ready *http.Server.

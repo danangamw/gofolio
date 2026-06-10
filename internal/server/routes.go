@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"io/fs"
 	"log"
 	"net/http"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/go-chi/cors"
 
 	authhandler "go-cms/internal/handler/auth"
+	publichandler "go-cms/internal/handler/public"
 	cmsmiddleware "go-cms/internal/middleware"
 )
 
@@ -36,11 +38,33 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
+	// ── Custom Not Found Handler ─────────────────────────────────────────────
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		tmpl.Render(w, "404", nil)
+	})
+
 	// ── Static assets from embed.FS ──────────────────────────────────────────
-	r.Handle("/static/*", http.FileServer(http.FS(s.webFs)))
+	webSub, err := fs.Sub(s.webFs, "web")
+	if err != nil {
+		panic("failed to get web sub filesystem: " + err.Error())
+	}
+	r.Handle("/static/*", http.FileServer(http.FS(webSub)))
 
 	// ── Health ───────────────────────────────────────────────────────────────
 	r.Get("/health", s.healthHandler)
+
+	// ── Public Pages ─────────────────────────────────────────────────────────
+	homeH := publichandler.NewHomeHandler(tmpl)
+	portH := publichandler.NewPortfolioHandler(tmpl)
+	blogH := publichandler.NewBlogHandler(tmpl)
+	aboutH := publichandler.NewAboutHandler(tmpl)
+
+	r.Get("/", homeH.Index)
+	r.Get("/portfolio", portH.List)
+	r.Get("/blog", blogH.List)
+	r.Get("/blog/{slug}", blogH.Detail)
+	r.Get("/about", aboutH.Index)
 
 	// ── Auth handler ─────────────────────────────────────────────────────────
 	authH := authhandler.New(tmpl, s.userRepo, s.sessions)

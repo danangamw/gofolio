@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"html/template"
 	"net/http"
 	"time"
 
@@ -12,15 +11,19 @@ import (
 
 const sessionCookieName = "go_cms_session"
 
+type Renderer interface {
+	Render(w http.ResponseWriter, name string, data any)
+}
+
 // Handler handles authentication HTTP requests (login page, login POST, logout).
 type Handler struct {
-	tmpl     *template.Template
+	tmpl     Renderer
 	userRepo *repository.UserRepository
 	sessions session.Store
 }
 
 // New creates an AuthHandler with the given dependencies.
-func New(tmpl *template.Template, userRepo *repository.UserRepository, store session.Store) *Handler {
+func New(tmpl Renderer, userRepo *repository.UserRepository, store session.Store) *Handler {
 	return &Handler{
 		tmpl:     tmpl,
 		userRepo: userRepo,
@@ -30,18 +33,17 @@ func New(tmpl *template.Template, userRepo *repository.UserRepository, store ses
 
 // loginViewModel is the data passed to the login template.
 type loginViewModel struct {
-	Title     string
-	CSRFToken string // placeholder — CSRF to be wired in Phase 5
-	Error     string
+	Title       string
+	Description string
+	ActiveMenu  string
+	CSRFToken   string // placeholder — CSRF to be wired in Phase 5
+	Error       string
 }
 
 // LoginPage renders the GET /login page.
 func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 	vm := loginViewModel{Title: "Login — Go CMS"}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := h.tmpl.ExecuteTemplate(w, "base", vm); err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	h.tmpl.Render(w, "login", vm)
 }
 
 // Login handles POST /login: validates credentials, creates a session, sets cookie.
@@ -56,9 +58,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	renderError := func(msg string) {
 		vm := loginViewModel{Title: "Login — Go CMS", Error: msg}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
-		h.tmpl.ExecuteTemplate(w, "base", vm)
+		h.tmpl.Render(w, "login", vm)
 	}
 
 	user, err := h.userRepo.FindByUsername(r.Context(), username)

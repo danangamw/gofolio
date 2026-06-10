@@ -1,3 +1,30 @@
 {{ define "content" }}
-<!-- TODO: blog_detail page content -->
+<article class="container" style="max-width: 800px; padding-top: 3rem; padding-bottom: 5rem;">
+    <!-- Article Header -->
+    <header style="margin-bottom: 3rem; text-align: center;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <span class="badge" style="background-color: color-mix(in oklch, var(--primary) 8%, transparent); color: var(--primary); border: none;">{{ .Blog.Category }}</span>
+            <time style="font-size: 0.9rem; color: var(--muted-foreground);">{{ .Blog.Date }}</time>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1.5rem; color: var(--foreground);">
+            {{ .Blog.Title }}
+        </h1>
+        <div style="font-size: 0.9rem; color: var(--muted-foreground);">
+            Written by <strong>{{ .Blog.Author }}</strong>
+        </div>
+    </header>
+
+    <!-- Post Content (using .prose class for rich markdown-like styles) -->
+    <div class="prose" style="font-size: 1.1rem; color: var(--foreground);">
+        {{ .Blog.HTMLContent }}
+    </div>
+
+    <!-- Back button -->
+    <footer style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+        <a href="/blog" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Blog
+        </a>
+    </footer>
+</article>
 {{ end }}

@@ -1,5 +1,5 @@
 {{ define "content" }}
-<div class="flex-center" style="min-height:100vh;padding:1rem;">
+<div class="flex-center" style="min-height: calc(100vh - 22rem); padding: 2rem 1rem;">
     <div style="width:100%;max-width:400px;">
         <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:1.5rem;text-align:center;">Login</h1>
         {{ if .Error }}<p style="color:var(--destructive);margin-bottom:1rem;text-align:center;">{{ .Error }}</p>{{ end }}
