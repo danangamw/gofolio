@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -10,19 +11,33 @@ import (
 
 	"go-cms/internal/config"
 	"go-cms/internal/database"
+	"go-cms/internal/repository"
+	"go-cms/internal/session"
 )
 
+// Server holds all application-wide dependencies shared across handlers.
 type Server struct {
-	cfg   *config.Config
-	db    database.Service
-	webFs embed.FS
+	cfg      *config.Config
+	db       database.Service
+	webFs    embed.FS
+	sessions session.Store
+	userRepo *repository.UserRepository
+	tmpl     *template.Template // parsed once at startup
 }
 
-func NewServer(cfg *config.Config, db database.Service, webFs embed.FS) *http.Server {
+// NewServer wires all dependencies and returns a ready *http.Server.
+func NewServer(
+	cfg *config.Config,
+	db database.Service,
+	webFs embed.FS,
+	sessions session.Store,
+) *http.Server {
 	s := &Server{
-		cfg:   cfg,
-		db:    db,
-		webFs: webFs,
+		cfg:      cfg,
+		db:       db,
+		webFs:    webFs,
+		sessions: sessions,
+		userRepo: repository.NewUserRepository(db.GetDB()),
 	}
 
 	return &http.Server{

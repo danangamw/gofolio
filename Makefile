@@ -5,11 +5,11 @@ all: build test
 
 build:
 	@echo "Building..."
-	@CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/go-cms ./cmd/api
+	@CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/go-cms ./cmd/app
 
 # Run the application (with hot-reload via air)
 run:
-	@if command -v air > /dev/null; then air; else go run ./cmd/api; fi
+	@if command -v air > /dev/null; then air; else go run ./cmd/app; fi
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
