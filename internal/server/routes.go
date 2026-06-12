@@ -37,6 +37,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	r.Use(cmsmiddleware.CSRF)
 
 	// ── Custom Not Found Handler ─────────────────────────────────────────────
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
@@ -55,9 +56,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/health", s.healthHandler)
 
 	// ── Public Pages ─────────────────────────────────────────────────────────
-	homeH := publichandler.NewHomeHandler(tmpl)
-	portH := publichandler.NewPortfolioHandler(tmpl)
-	blogH := publichandler.NewBlogHandler(tmpl)
+	homeH := publichandler.NewHomeHandler(tmpl, s.blogRepo, s.portfolioRepo)
+	portH := publichandler.NewPortfolioHandler(tmpl, s.portfolioRepo)
+	blogH := publichandler.NewBlogHandler(tmpl, s.blogRepo)
 	aboutH := publichandler.NewAboutHandler(tmpl)
 
 	r.Get("/", homeH.Index)
@@ -73,13 +74,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Post("/login", authH.Login)
 
 	// ── Admin Pages ──────────────────────────────────────────────────────────
-	adminDashH := adminhandler.NewDashboardHandler(tmpl)
-	adminBlogH := adminhandler.NewAdminBlogHandler(tmpl)
-	adminPortH := adminhandler.NewAdminPortfolioHandler(tmpl)
+	adminDashH := adminhandler.NewDashboardHandler(tmpl, s.blogRepo, s.portfolioRepo)
+	adminBlogH := adminhandler.NewAdminBlogHandler(tmpl, s.blogRepo)
+	adminPortH := adminhandler.NewAdminPortfolioHandler(tmpl, s.portfolioRepo)
 
-	// ── Admin routes (bypassed login for static testing) ──────────────────────
+	// ── Admin routes ─────────────────────────────────────────────────────────
 	r.Route("/admin", func(r chi.Router) {
-		// r.Use(cmsmiddleware.Auth(s.sessions)) // Bypassed for static UI testing
+		r.Use(cmsmiddleware.Auth(s.sessions))
 
 		r.Post("/logout", authH.Logout)
 

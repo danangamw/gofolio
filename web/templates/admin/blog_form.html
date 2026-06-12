@@ -47,7 +47,7 @@
             <!-- HTML Content -->
             <div class="form-group">
                 <label class="form-label" for="content">Article Content (Markdown)</label>
-                <textarea id="content" name="content" class="form-control" placeholder="Write your article here..." required>{{ if .IsEdit }}{{ .Blog.HTMLContent }}{{ end }}</textarea>
+                <textarea id="content" name="content" class="form-control" placeholder="Write your article here..." required>{{ if .IsEdit }}{{ .Blog.Content }}{{ end }}</textarea>
             </div>
 
             <!-- Actions -->

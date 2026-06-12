@@ -2,67 +2,27 @@ package public
 
 import (
 	"net/http"
+
+	"go-cms/internal/repository"
 )
 
 type PortfolioHandler struct {
 	tmpl Renderer
+	repo *repository.PortfolioRepository
 }
 
-func NewPortfolioHandler(tmpl Renderer) *PortfolioHandler {
-	return &PortfolioHandler{tmpl: tmpl}
-}
-
-type portfolioItem struct {
-	Title         string
-	Description   string
-	Icon          string
-	TechStack     []string
-	ProjectURL    string
-	RepositoryURL string
+func NewPortfolioHandler(tmpl Renderer, repo *repository.PortfolioRepository) *PortfolioHandler {
+	return &PortfolioHandler{
+		tmpl: tmpl,
+		repo: repo,
+	}
 }
 
 func (h *PortfolioHandler) List(w http.ResponseWriter, r *http.Request) {
-	portfolios := []portfolioItem{
-		{
-			Title:         "Go-CMS Monolith",
-			Description:   "A modular, high-performance Content Management System built with Go, Postgres, Redis, and OpenTelemetry.",
-			Icon:          "🚀",
-			TechStack:     []string{"Go", "PostgreSQL", "Redis", "OTel"},
-			ProjectURL:    "https://github.com",
-			RepositoryURL: "https://github.com",
-		},
-		{
-			Title:         "E-Commerce Payment Gateway",
-			Description:   "An asynchronous microservices system to process e-commerce transactions using Message Queues.",
-			Icon:          "💳",
-			TechStack:     []string{"Go", "RabbitMQ", "PostgreSQL", "Docker"},
-			ProjectURL:    "",
-			RepositoryURL: "https://github.com",
-		},
-		{
-			Title:         "Realtime Chat Application",
-			Description:   "A real-time communication application using WebSockets, distributed with Redis Pub/Sub.",
-			Icon:          "💬",
-			TechStack:     []string{"Go", "WebSocket", "Redis", "HTML/CSS"},
-			ProjectURL:    "https://github.com",
-			RepositoryURL: "https://github.com",
-		},
-		{
-			Title:         "Docker Janitor CLI",
-			Description:   "A lightweight CLI application to automatically clean up Docker containers, images, volumes, and networks.",
-			Icon:          "🧹",
-			TechStack:     []string{"Go", "Docker API", "CLI"},
-			ProjectURL:    "",
-			RepositoryURL: "https://github.com/danangamw/go-janitor",
-		},
-		{
-			Title:         "Notification Engine",
-			Description:   "A mass notification engine for email, WhatsApp, and push notifications with automatic failover.",
-			Icon:          "🔔",
-			TechStack:     []string{"Go", "gRPC", "PostgreSQL", "Redis"},
-			ProjectURL:    "",
-			RepositoryURL: "https://github.com",
-		},
+	portfolios, err := h.repo.FindAll(r.Context())
+	if err != nil {
+		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	data := map[string]any{

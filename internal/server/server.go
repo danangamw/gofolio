@@ -16,12 +16,14 @@ import (
 
 // Server holds all application-wide dependencies shared across handlers.
 type Server struct {
-	cfg      *config.Config
-	db       database.Service
-	webFs    embed.FS
-	sessions session.Store
-	userRepo *repository.UserRepository
-	tmpl     *TemplateRegistry // parsed once at startup
+	cfg           *config.Config
+	db            database.Service
+	webFs         embed.FS
+	sessions      session.Store
+	userRepo      *repository.UserRepository
+	blogRepo      *repository.BlogRepository
+	portfolioRepo *repository.PortfolioRepository
+	tmpl          *TemplateRegistry // parsed once at startup
 }
 
 // NewServer wires all dependencies and returns a ready *http.Server.
@@ -32,11 +34,13 @@ func NewServer(
 	sessions session.Store,
 ) *http.Server {
 	s := &Server{
-		cfg:      cfg,
-		db:       db,
-		webFs:    webFs,
-		sessions: sessions,
-		userRepo: repository.NewUserRepository(db.GetDB()),
+		cfg:           cfg,
+		db:            db,
+		webFs:         webFs,
+		sessions:      sessions,
+		userRepo:      repository.NewUserRepository(db.GetDB()),
+		blogRepo:      repository.NewBlogRepository(db.GetDB()),
+		portfolioRepo: repository.NewPortfolioRepository(db.GetDB()),
 	}
 
 	return &http.Server{

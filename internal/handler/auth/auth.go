@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"go-cms/internal/middleware"
 	"go-cms/internal/repository"
 	"go-cms/internal/service"
 	"go-cms/internal/session"
@@ -36,13 +37,16 @@ type loginViewModel struct {
 	Title       string
 	Description string
 	ActiveMenu  string
-	CSRFToken   string // placeholder — CSRF to be wired in Phase 5
+	CSRFToken   string
 	Error       string
 }
 
 // LoginPage renders the GET /login page.
 func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
-	vm := loginViewModel{Title: "Login — Go CMS"}
+	vm := loginViewModel{
+		Title:     "Login — Go CMS",
+		CSRFToken: middleware.GetCSRFToken(r.Context()),
+	}
 	h.tmpl.Render(w, "login", vm)
 }
 
@@ -57,7 +61,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	renderError := func(msg string) {
-		vm := loginViewModel{Title: "Login — Go CMS", Error: msg}
+		vm := loginViewModel{
+			Title:     "Login — Go CMS",
+			Error:     msg,
+			CSRFToken: middleware.GetCSRFToken(r.Context()),
+		}
 		w.WriteHeader(http.StatusUnauthorized)
 		h.tmpl.Render(w, "login", vm)
 	}

@@ -1,10 +1,13 @@
 package model
 
 import (
+	"bytes"
+	"html/template"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/yuin/goldmark"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +26,7 @@ type Blog struct {
 	ID          uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Title       string         `gorm:"type:varchar(255);not null"`
 	Slug        string         `gorm:"type:varchar(255);uniqueIndex;not null"`
+	Category    string         `gorm:"type:varchar(100);default:'';not null"`
 	Content     string         `gorm:"type:text;not null"`
 	Excerpt     string         `gorm:"type:text"`
 	Status      string         `gorm:"type:varchar(20);default:'draft';not null"` // 'draft' or 'published'
@@ -35,6 +39,7 @@ type Blog struct {
 type Portfolio struct {
 	ID            uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Title         string         `gorm:"type:varchar(255);not null"`
+	Icon          string         `gorm:"type:varchar(50);default:'';not null"`
 	Description   string         `gorm:"type:text"`
 	ImageURL      string         `gorm:"type:varchar(500)"`
 	TechStack     pq.StringArray `gorm:"type:text[]"` // Native Postgres TEXT[] array
@@ -75,3 +80,27 @@ func (p *Portfolio) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
+
+// Date returns a formatted string of the publish/creation date.
+func (b Blog) Date() string {
+	if b.PublishedAt != nil {
+		return b.PublishedAt.Format("January 2, 2006")
+	}
+	return b.CreatedAt.Format("January 2, 2006")
+}
+
+// HTMLContent converts markdown content to safe HTML.
+func (b Blog) HTMLContent() template.HTML {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(b.Content), &buf); err != nil {
+		return template.HTML(b.Content)
+	}
+	return template.HTML(buf.String())
+}
+
+// Author returns a static author name 'Danang' as defined by user context.
+func (b Blog) Author() string {
+	return "Danang"
+}
+
+
