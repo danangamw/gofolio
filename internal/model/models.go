@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/yuin/goldmark"
 	"gorm.io/gorm"
 )
@@ -93,9 +94,12 @@ func (b Blog) Date() string {
 func (b Blog) HTMLContent() template.HTML {
 	var buf bytes.Buffer
 	if err := goldmark.Convert([]byte(b.Content), &buf); err != nil {
-		return template.HTML(b.Content)
+		// Even for simple fallback, sanitize the output.
+		sanitizedRaw := bluemonday.UGCPolicy().SanitizeBytes([]byte(b.Content))
+		return template.HTML(sanitizedRaw)
 	}
-	return template.HTML(buf.String())
+	sanitized := bluemonday.UGCPolicy().SanitizeBytes(buf.Bytes())
+	return template.HTML(sanitized)
 }
 
 // Author returns a static author name 'Danang' as defined by user context.

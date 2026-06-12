@@ -33,6 +33,10 @@ type Config struct {
 	AdminUsername string
 	AdminPassword string
 
+	// Rate Limiting
+	RateLimitRPS   float64
+	RateLimitBurst int
+
 	// Telemetry / Observability
 	ServiceName    string // Service name displayed in Grafana (default: "go-cms")
 	ServiceVersion string // Service version, ideally from git tag (default: "dev")
@@ -49,6 +53,13 @@ func Load() *Config {
 
 	s3AccessKey := getEnv("S3_ACCESS_KEY_ID", os.Getenv("AWS_ACCESS_KEY_ID"))
 	s3SecretKey := getEnv("S3_SECRET_ACCESS_KEY", os.Getenv("AWS_SECRET_ACCESS_KEY"))
+
+	rpsStr := getEnv("RATE_LIMIT_RPS", "5")
+	rateLimitRPS, err := strconv.ParseFloat(rpsStr, 64)
+	if err != nil || rateLimitRPS <= 0 {
+		rateLimitRPS = 5.0
+	}
+	rateLimitBurst := getEnvInt("RATE_LIMIT_BURST", 10)
 
 	return &Config{
 		AppEnv:         getEnv("APP_ENV", "development"),
@@ -73,6 +84,9 @@ func Load() *Config {
 
 		AdminUsername: os.Getenv("ADMIN_USERNAME"),
 		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+
+		RateLimitRPS:   rateLimitRPS,
+		RateLimitBurst: rateLimitBurst,
 
 		// Telemetry
 		ServiceName:    getEnv("SERVICE_NAME", "go-cms"),

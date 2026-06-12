@@ -14,6 +14,7 @@ import (
 	publichandler "go-cms/internal/handler/public"
 	cmsmiddleware "go-cms/internal/middleware"
 	"go-cms/internal/service"
+	"golang.org/x/time/rate"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -73,11 +74,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/blog/{slug}", blogH.Detail)
 	r.Get("/about", aboutH.Index)
 
+	// Rate limiting middleware for sensitive endpoints
+	limiter := cmsmiddleware.RateLimiter(rate.Limit(s.cfg.RateLimitRPS), s.cfg.RateLimitBurst)
+
 	// ── Auth handler ─────────────────────────────────────────────────────────
 	authH := authhandler.New(tmpl, s.userRepo, s.sessions)
 
 	r.Get("/login", authH.LoginPage)
-	r.Post("/login", authH.Login)
+	r.With(limiter).Post("/login", authH.Login)
 
 	// ── Admin Pages & Services ───────────────────────────────────────────────
 	uploadSvc := service.NewUploadService(s.cfg)
@@ -96,7 +100,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/", adminDashH.Index)
 
 		// File Upload route
-		r.Post("/upload", uploadH.Upload)
+		r.With(limiter).Post("/upload", uploadH.Upload)
 
 		// Blog administration routes
 		r.Get("/blogs", adminBlogH.List)
