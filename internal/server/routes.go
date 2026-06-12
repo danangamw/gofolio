@@ -13,6 +13,7 @@ import (
 	authhandler "go-cms/internal/handler/auth"
 	publichandler "go-cms/internal/handler/public"
 	cmsmiddleware "go-cms/internal/middleware"
+	"go-cms/internal/service"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -52,6 +53,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 	r.Handle("/static/*", http.FileServer(http.FS(webSub)))
 
+	// Serve uploads locally if configured
+	if s.cfg.UploadStorage == "local" {
+		r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir(s.cfg.UploadDir))))
+	}
+
 	// ── Health ───────────────────────────────────────────────────────────────
 	r.Get("/health", s.healthHandler)
 
@@ -73,7 +79,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/login", authH.LoginPage)
 	r.Post("/login", authH.Login)
 
-	// ── Admin Pages ──────────────────────────────────────────────────────────
+	// ── Admin Pages & Services ───────────────────────────────────────────────
+	uploadSvc := service.NewUploadService(s.cfg)
+	uploadH := adminhandler.NewUploadHandler(uploadSvc)
+
 	adminDashH := adminhandler.NewDashboardHandler(tmpl, s.blogRepo, s.portfolioRepo)
 	adminBlogH := adminhandler.NewAdminBlogHandler(tmpl, s.blogRepo)
 	adminPortH := adminhandler.NewAdminPortfolioHandler(tmpl, s.portfolioRepo)
@@ -85,6 +94,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Post("/logout", authH.Logout)
 
 		r.Get("/", adminDashH.Index)
+
+		// File Upload route
+		r.Post("/upload", uploadH.Upload)
 
 		// Blog administration routes
 		r.Get("/blogs", adminBlogH.List)

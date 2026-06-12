@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"go-cms/internal/database"
 	"go-cms/internal/repository"
 	"go-cms/internal/session"
+	"go-cms/pkg/storage"
 )
 
 // Server holds all application-wide dependencies shared across handlers.
@@ -41,6 +43,22 @@ func NewServer(
 		userRepo:      repository.NewUserRepository(db.GetDB()),
 		blogRepo:      repository.NewBlogRepository(db.GetDB()),
 		portfolioRepo: repository.NewPortfolioRepository(db.GetDB()),
+	}
+
+	if cfg.UploadStorage == "s3" {
+		log.Printf("Initializing S3/MinIO storage client (endpoint: %s, bucket: %s)...", cfg.S3Endpoint, cfg.S3Bucket)
+		err := storage.InitStorageFromConfig(
+			cfg.S3Endpoint,
+			cfg.S3PublicEndpoint,
+			cfg.S3AccessKeyID,
+			cfg.S3SecretAccessKey,
+			cfg.S3Bucket,
+			cfg.S3Region,
+		)
+		if err != nil {
+			log.Fatalf("Failed to initialize S3/MinIO storage: %v", err)
+		}
+		log.Println("S3/MinIO storage client initialized successfully.")
 	}
 
 	return &http.Server{

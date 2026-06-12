@@ -21,11 +21,14 @@ type Config struct {
 
 	RedisURL string
 
-	UploadStorage string // "local" or "s3"
-	UploadDir     string
-	S3Bucket      string
-	S3Region      string
-	S3Endpoint    string
+	UploadStorage      string // "local" or "s3"
+	UploadDir          string
+	S3Bucket           string
+	S3Region           string
+	S3Endpoint         string
+	S3PublicEndpoint   string
+	S3AccessKeyID      string
+	S3SecretAccessKey  string
 
 	AdminUsername string
 	AdminPassword string
@@ -44,6 +47,9 @@ func Load() *Config {
 		log.Fatal("APP_SECRET_KEY is required (min 32 chars)")
 	}
 
+	s3AccessKey := getEnv("S3_ACCESS_KEY_ID", os.Getenv("AWS_ACCESS_KEY_ID"))
+	s3SecretKey := getEnv("S3_SECRET_ACCESS_KEY", os.Getenv("AWS_SECRET_ACCESS_KEY"))
+
 	return &Config{
 		AppEnv:         getEnv("APP_ENV", "development"),
 		AppPort:        getEnv("APP_PORT", "8080"),
@@ -56,11 +62,14 @@ func Load() *Config {
 
 		RedisURL: os.Getenv("REDIS_URL"), // optional
 
-		UploadStorage: getEnv("UPLOAD_STORAGE", "local"),
-		UploadDir:     getEnv("UPLOAD_DIR", "./uploads"),
-		S3Bucket:      os.Getenv("S3_BUCKET"),
-		S3Region:      os.Getenv("S3_REGION"),
-		S3Endpoint:    os.Getenv("S3_ENDPOINT"),
+		UploadStorage:     getEnv("UPLOAD_STORAGE", "local"),
+		UploadDir:         getEnv("UPLOAD_DIR", "./uploads"),
+		S3Bucket:          getEnv("S3_BUCKET", "go-cms"),
+		S3Region:          getEnv("S3_REGION", "us-east-1"),
+		S3Endpoint:        os.Getenv("S3_ENDPOINT"),
+		S3PublicEndpoint:  os.Getenv("S3_PUBLIC_ENDPOINT"),
+		S3AccessKeyID:     s3AccessKey,
+		S3SecretAccessKey: s3SecretKey,
 
 		AdminUsername: os.Getenv("ADMIN_USERNAME"),
 		AdminPassword: os.Getenv("ADMIN_PASSWORD"),

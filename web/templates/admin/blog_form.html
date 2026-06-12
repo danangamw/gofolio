@@ -69,6 +69,35 @@
             singleLineBreaks: false,
             codeSyntaxHighlighting: true,
         },
+        imageUpload: true,
+        imageUploadFunction: function(file, onSuccess, onError) {
+            const formData = new FormData();
+            formData.append("image", file);
+
+            fetch("/admin/upload", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": "{{ .CSRFToken }}"
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Upload failed: status " + response.status);
+                }
+                return response.json();
+            })
+            .then(json => {
+                if (json.status === 1 || (json.data && json.data.filePath)) {
+                    onSuccess(json.data.filePath);
+                } else {
+                    onError(json.message || "Upload failed");
+                }
+            })
+            .catch(err => {
+                onError(err.message || "An error occurred during upload");
+            });
+        }
     });
 </script>
 {{ end }}
