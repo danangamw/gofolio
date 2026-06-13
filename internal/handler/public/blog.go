@@ -1,11 +1,13 @@
 package public
 
 import (
+	"errors"
 	"net/http"
 
 	"go-cms/internal/repository"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 )
 
 type BlogHandler struct {
@@ -40,10 +42,14 @@ func (h *BlogHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	blog, err := h.repo.FindBySlug(r.Context(), slug)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			h.render404(w, r)
+			return
+		}
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if blog == nil || blog.Status != "published" {
+	if blog.Status != "published" {
 		h.render404(w, r)
 		return
 	}

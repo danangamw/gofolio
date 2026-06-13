@@ -7,9 +7,12 @@ import (
 
 	"go-cms/internal/config"
 	"go-cms/internal/database"
+	"go-cms/internal/dto"
 	"go-cms/internal/model"
 	"go-cms/internal/repository"
 	"go-cms/internal/service"
+
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -37,11 +40,11 @@ func main() {
 	ctx := context.Background()
 
 	// Check if user already exists — idempotent.
-	existing, err := userRepo.FindByUsername(ctx, username)
-	if err != nil {
+	_, err := userRepo.FindByUsername(ctx, username)
+	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Fatalf("seed: check existing user: %v", err)
 	}
-	if existing != nil {
+	if err == nil {
 		log.Printf("Admin user %q already exists — skipping seed.", username)
 		return
 	}
@@ -51,29 +54,30 @@ func main() {
 		log.Fatalf("seed: hash password: %v", err)
 	}
 
-	user := &model.User{
+	userReq := dto.CreateUserRequest{
 		Username:     username,
 		PasswordHash: hash,
 	}
 
-	if err := userRepo.Create(ctx, user); err != nil {
+	createdUser, err := userRepo.Create(ctx, userReq)
+	if err != nil {
 		log.Fatalf("seed: create admin user: %v", err)
 	}
 
-	log.Printf("Admin user %q created successfully (id: %s)", username, user.ID)
+	log.Printf("Admin user %q created successfully (id: %s)", username, createdUser.ID)
 
 	// Seed Blog Posts
 	blogRepo := repository.NewBlogRepository(db.GetDB())
 	count, err := blogRepo.Count(ctx)
 	if err == nil && count == 0 {
 		now := time.Now()
-		blogs := []model.Blog{
+		blogs := []dto.CreateBlogRequest{
 			{
-				Title:       "Understanding Dependency Injection in Go Simply",
-				Slug:        "understanding-dependency-injection-in-go",
-				Category:    "Go",
-				Excerpt:     "How to neatly manage database and third-party dependencies in Go applications without external frameworks.",
-				Content:     `Dependency Injection (DI) is often considered a complex concept because it is associated with large frameworks. However, in the Go programming language, Dependency Injection is actually very simple and does not require additional frameworks (like Wire or Dig) for most applications.
+				Title:    "Understanding Dependency Injection in Go Simply",
+				Slug:     "understanding-dependency-injection-in-go",
+				Category: "Go",
+				Excerpt:  "How to neatly manage database and third-party dependencies in Go applications without external frameworks.",
+				Content: `Dependency Injection (DI) is often considered a complex concept because it is associated with large frameworks. However, in the Go programming language, Dependency Injection is actually very simple and does not require additional frameworks (like Wire or Dig) for most applications.
 
 ## What is Dependency Injection?
 Simply put, Dependency Injection means we pass the dependencies (like database connections or third-party clients) required by a function/struct, instead of letting it instantiate or search for them itself from global variables.
@@ -116,11 +120,11 @@ By implementing simple Dependency Injection through struct constructors (like Ne
 				PublishedAt: &now,
 			},
 			{
-				Title:       "Integrating OpenTelemetry Tracing in GORM",
-				Slug:        "integrating-opentelemetry-tracing-in-gorm",
-				Category:    "Observability",
-				Excerpt:     "A complete guide on recording SQL query performance directly to Grafana Tempo using the OTel GORM plugin.",
-				Content:     `When our application slows down, one of the main suspects is sub-optimal database queries. By setting up distributed tracing using OpenTelemetry (OTel) and GORM, we can track SQL query details, parameters, and duration directly in a visual dashboard like Grafana Tempo.
+				Title:    "Integrating OpenTelemetry Tracing in GORM",
+				Slug:     "integrating-opentelemetry-tracing-in-gorm",
+				Category: "Observability",
+				Excerpt:  "A complete guide on recording SQL query performance directly to Grafana Tempo using the OTel GORM plugin.",
+				Content: `When our application slows down, one of the main suspects is sub-optimal database queries. By setting up distributed tracing using OpenTelemetry (OTel) and GORM, we can track SQL query details, parameters, and duration directly in a visual dashboard like Grafana Tempo.
 
 ## Why Use Tracing for Databases?
 With tracing, every database query executed during an HTTP request will be recorded as a child span. This makes it easy to see the relation between HTTP requests and the SQL queries running under the hood.
@@ -162,11 +166,11 @@ Integrating OpenTelemetry with GORM is a crucial step for production-ready appli
 				PublishedAt: &now,
 			},
 			{
-				Title:       "Designing Database Schema Migrations with Atlas",
-				Slug:        "designing-database-schema-migrations-with-atlas",
-				Category:    "Database",
-				Excerpt:     "Why declarative migrations with Atlas are safer and more efficient than traditional manual SQL scripts.",
-				Content:     `Managing database schema changes (migrations) often poses a major challenge when working in teams. Using manual approaches like writing raw SQL files is prone to conflicts and human errors. This is where Atlas shines as a modern migration solution.
+				Title:    "Designing Database Schema Migrations with Atlas",
+				Slug:     "designing-database-schema-migrations-with-atlas",
+				Category: "Database",
+				Excerpt:  "Why declarative migrations with Atlas are safer and more efficient than traditional manual SQL scripts.",
+				Content: `Managing database schema changes (migrations) often poses a major challenge when working in teams. Using manual approaches like writing raw SQL files is prone to conflicts and human errors. This is where Atlas shines as a modern migration solution.
 
 ## Declarative vs. Imperative Approach
 Most traditional Go migration libraries (like golang-migrate) use an imperative model: you write explicit SQL commands like CREATE TABLE or ALTER TABLE. If there is a typo, the migration could fail halfway.
@@ -188,7 +192,7 @@ By combining declarative safety from Atlas and GORM mapping convenience, develop
 		}
 
 		for _, b := range blogs {
-			if err := blogRepo.Create(ctx, &b); err != nil {
+			if _, err := blogRepo.Create(ctx, b); err != nil {
 				log.Printf("seed: error creating blog %q: %v", b.Title, err)
 			}
 		}
@@ -199,7 +203,7 @@ By combining declarative safety from Atlas and GORM mapping convenience, develop
 	portfolioRepo := repository.NewPortfolioRepository(db.GetDB())
 	pCount, err := portfolioRepo.Count(ctx)
 	if err == nil && pCount == 0 {
-		portfolios := []model.Portfolio{
+		portfolios := []dto.CreatePortfolioRequest{
 			{
 				Title:         "Go-CMS Monolith",
 				Icon:          "🚀",
@@ -243,7 +247,7 @@ By combining declarative safety from Atlas and GORM mapping convenience, develop
 		}
 
 		for _, p := range portfolios {
-			if err := portfolioRepo.Create(ctx, &p); err != nil {
+			if _, err := portfolioRepo.Create(ctx, p); err != nil {
 				log.Printf("seed: error creating portfolio %q: %v", p.Title, err)
 			}
 		}

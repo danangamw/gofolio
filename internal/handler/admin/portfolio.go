@@ -1,14 +1,16 @@
 package admin
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
+	"go-cms/internal/dto"
 	"go-cms/internal/middleware"
-	"go-cms/internal/model"
 	"go-cms/internal/repository"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 )
 
 type AdminPortfolioHandler struct {
@@ -70,7 +72,7 @@ func (h *AdminPortfolioHandler) Create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	portfolio := &model.Portfolio{
+	req := dto.CreatePortfolioRequest{
 		Title:         title,
 		Icon:          icon,
 		TechStack:     techStack,
@@ -79,7 +81,7 @@ func (h *AdminPortfolioHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Description:   description,
 	}
 
-	if err := h.repo.Create(r.Context(), portfolio); err != nil {
+	if _, err := h.repo.Create(r.Context(), req); err != nil {
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -91,11 +93,11 @@ func (h *AdminPortfolioHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	title := chi.URLParam(r, "title")
 	portfolio, err := h.repo.FindByTitle(r.Context(), title)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if portfolio == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
@@ -114,11 +116,11 @@ func (h *AdminPortfolioHandler) Update(w http.ResponseWriter, r *http.Request) {
 	title := chi.URLParam(r, "title")
 	portfolio, err := h.repo.FindByTitle(r.Context(), title)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if portfolio == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
@@ -142,14 +144,17 @@ func (h *AdminPortfolioHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	portfolio.Title = newTitle
-	portfolio.Icon = icon
-	portfolio.TechStack = techStack
-	portfolio.ProjectURL = projectURL
-	portfolio.RepositoryURL = repositoryURL
-	portfolio.Description = description
+	req := dto.UpdatePortfolioRequest{
+		Title:         newTitle,
+		Icon:          icon,
+		TechStack:     techStack,
+		ProjectURL:    projectURL,
+		RepositoryURL: repositoryURL,
+		Description:   description,
+		SortOrder:     portfolio.SortOrder,
+	}
 
-	if err := h.repo.Update(r.Context(), portfolio); err != nil {
+	if _, err := h.repo.Update(r.Context(), portfolio.ID, req); err != nil {
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

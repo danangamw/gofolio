@@ -71,7 +71,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.userRepo.FindByUsername(r.Context(), username)
-	if err != nil || user == nil {
+	if err != nil {
 		renderError("Username atau password salah.")
 		return
 	}
@@ -88,7 +88,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.sessions.Set(r.Context(), token, user.ID.String(), 0); err != nil {
+	if err := h.sessions.Set(r.Context(), token, user.ID, 0); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

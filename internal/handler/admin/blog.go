@@ -1,16 +1,18 @@
 package admin
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
+	"go-cms/internal/dto"
 	"go-cms/internal/middleware"
-	"go-cms/internal/model"
 	"go-cms/internal/repository"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 )
 
 type AdminBlogHandler struct {
@@ -63,7 +65,7 @@ func (h *AdminBlogHandler) Create(w http.ResponseWriter, r *http.Request) {
 	excerpt := r.FormValue("excerpt")
 	content := r.FormValue("content")
 
-	blog := &model.Blog{
+	req := dto.CreateBlogRequest{
 		Title:       title,
 		Slug:        slugify(title),
 		Category:    category,
@@ -73,7 +75,7 @@ func (h *AdminBlogHandler) Create(w http.ResponseWriter, r *http.Request) {
 		PublishedAt: parseDateInput(dateStr),
 	}
 
-	if err := h.repo.Create(r.Context(), blog); err != nil {
+	if _, err := h.repo.Create(r.Context(), req); err != nil {
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -85,11 +87,11 @@ func (h *AdminBlogHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	blog, err := h.repo.FindBySlug(r.Context(), slug)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if blog == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
@@ -107,11 +109,11 @@ func (h *AdminBlogHandler) Update(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	blog, err := h.repo.FindBySlug(r.Context(), slug)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if blog == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
@@ -126,14 +128,17 @@ func (h *AdminBlogHandler) Update(w http.ResponseWriter, r *http.Request) {
 	excerpt := r.FormValue("excerpt")
 	content := r.FormValue("content")
 
-	blog.Title = title
-	blog.Slug = slugify(title)
-	blog.Category = category
-	blog.Excerpt = excerpt
-	blog.Content = content
-	blog.PublishedAt = parseDateInput(dateStr)
+	req := dto.UpdateBlogRequest{
+		Title:       title,
+		Slug:        slugify(title),
+		Category:    category,
+		Excerpt:     excerpt,
+		Content:     content,
+		Status:      blog.Status,
+		PublishedAt: parseDateInput(dateStr),
+	}
 
-	if err := h.repo.Update(r.Context(), blog); err != nil {
+	if _, err := h.repo.Update(r.Context(), blog.ID, req); err != nil {
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

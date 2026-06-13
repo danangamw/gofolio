@@ -3,13 +3,15 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"go-cms/internal/model"
+	"go-cms/internal/dto"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-// UserRepository handles all user-related database queries.
+// UserRepository handles all user-related database queries using Raw SQL.
 type UserRepository struct {
 	db *gorm.DB
 }
@@ -20,37 +22,67 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 // FindByUsername retrieves a user by their username.
-// Returns (nil, nil) if no user is found.
-func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*model.User, error) {
-	var user model.User
-	err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	}
+func (r *UserRepository) FindByUsername(ctx context.Context, username string) (dto.UserResponse, error) {
+	var resp dto.UserResponse
+	query := `
+		SELECT id, username, password_hash, created_at, updated_at 
+		FROM users 
+		WHERE username = ?
+	`
+	err := r.db.WithContext(ctx).Raw(query, username).Scan(&resp).Error
 	if err != nil {
-		return nil, fmt.Errorf("user repo: find by username: %w", err)
+		return dto.UserResponse{}, fmt.Errorf("user repo: find by username: %w", err)
 	}
-	return &user, nil
+
+	if resp.ID == "" {
+		return dto.UserResponse{}, gorm.ErrRecordNotFound
+	}
+
+	return resp, nil
 }
 
 // FindByID retrieves a user by their UUID.
-// Returns (nil, nil) if not found.
-func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, error) {
-	var user model.User
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	}
+func (r *UserRepository) FindByID(ctx context.Context, id string) (dto.UserResponse, error) {
+	var resp dto.UserResponse
+	query := `
+		SELECT id, username, password_hash, created_at, updated_at 
+		FROM users 
+		WHERE id = ?
+	`
+	err := r.db.WithContext(ctx).Raw(query, id).Scan(&resp).Error
 	if err != nil {
-		return nil, fmt.Errorf("user repo: find by id: %w", err)
+		return dto.UserResponse{}, fmt.Errorf("user repo: find by id: %w", err)
 	}
-	return &user, nil
+
+	if resp.ID == "" {
+		return dto.UserResponse{}, gorm.ErrRecordNotFound
+	}
+
+	return resp, nil
 }
 
-// Create inserts a new user record and returns the created user.
-func (r *UserRepository) Create(ctx context.Context, user *model.User) error {
-	if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
-		return fmt.Errorf("user repo: create: %w", err)
+// Create inserts a new user record.
+func (r *UserRepository) Create(ctx context.Context, req dto.CreateUserRequest) (dto.UserResponse, error) {
+	id, err := uuid.NewV7()
+	if err != nil {
+		return dto.UserResponse{}, fmt.Errorf("user repo: create: generate uuid: %w", err)
 	}
-	return nil
+	now := time.Now()
+
+	query := `
+		INSERT INTO users (id, username, password_hash, created_at, updated_at) 
+		VALUES (?, ?, ?, ?, ?)
+	`
+	err = r.db.WithContext(ctx).Exec(query, id, req.Username, req.PasswordHash, now, now).Error
+	if err != nil {
+		return dto.UserResponse{}, fmt.Errorf("user repo: create: %w", err)
+	}
+
+	return dto.UserResponse{
+		ID:           id.String(),
+		Username:     req.Username,
+		PasswordHash: req.PasswordHash,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}, nil
 }
