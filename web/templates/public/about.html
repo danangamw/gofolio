@@ -8,11 +8,11 @@
     <div style="margin-top: 1rem;">
         <div class="stats-grid" style="margin-bottom: 3rem;">
             {{ range .ValueHighlights }}
-            <div class="card stat-card" style="align-items: flex-start;">
-                <div class="stat-card-icon" style="width: 2.75rem; height: 2.75rem; font-size: 1.25rem;">✓</div>
+            <div class="about-highlight-item">
+                <div class="about-highlight-icon">✓</div>
                 <div>
-                    <div class="stat-card-label" style="margin-bottom: 0.35rem;">{{ .Title }}</div>
-                    <div style="color: var(--muted-foreground); line-height: 1.6;">{{ .Description }}</div>
+                    <div class="about-highlight-title">{{ .Title }}</div>
+                    <div class="about-highlight-description">{{ .Description }}</div>
                 </div>
             </div>
             {{ end }}
@@ -30,20 +30,23 @@
                 <div class="about-experience-timeline">
                     {{ range .AboutExperiences }}
                     <div class="about-experience-item">
-                        <div class="about-experience-header">
-                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">{{ .Title }}</h3>
-                            <span class="badge" style="font-size: 0.75rem;">{{ .Period }}</span>
-                        </div>
-                        <div class="about-experience-company">{{ .Company }}</div>
-                        {{ if .Bullets }}
-                        <ul style="margin: 0; padding-left: 1.2rem; color: var(--muted-foreground); font-size: 0.95rem;">
-                            {{ range .Bullets }}
-                            <li style="margin-bottom: 0.4rem;">{{ . }}</li>
+                        <div class="about-experience-marker"></div>
+                        <div class="about-experience-body">
+                            <div class="about-experience-header">
+                                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">{{ .Title }}</h3>
+                                <span class="badge" style="font-size: 0.75rem;">{{ .Period }}</span>
+                            </div>
+                            <div class="about-experience-company">{{ .Company }}</div>
+                            {{ if .Bullets }}
+                            <ul class="about-experience-bullets">
+                                {{ range .Bullets }}
+                                <li>{{ . }}</li>
+                                {{ end }}
+                            </ul>
+                            {{ else }}
+                            <p class="about-experience-summary">{{ .Description }}</p>
                             {{ end }}
-                        </ul>
-                        {{ else }}
-                        <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">{{ .Description }}</p>
-                        {{ end }}
+                        </div>
                     </div>
                     {{ end }}
                 </div>

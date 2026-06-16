@@ -465,28 +465,50 @@ body {
 }
 
 .about-experience-timeline {
-  border-left: 2px solid var(--border);
-  padding-left: 1.5rem;
+  position: relative;
   margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding-left: 1.75rem;
+}
+
+.about-experience-timeline::before {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 2px;
+  background: var(--border);
 }
 
 .about-experience-item {
   position: relative;
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.about-experience-marker {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent);
+  z-index: 1;
+}
+
+.about-experience-body {
+  min-width: 0;
 }
 
 .about-experience-item::before {
   content: "";
-  position: absolute;
-  left: -1.62rem;
-  top: 0.35rem;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent);
+  display: none;
 }
 
 .about-experience-header {
@@ -502,6 +524,21 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
+}
+
+.about-experience-summary,
+.about-experience-bullets {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+.about-experience-bullets {
+  padding-left: 1.2rem;
+}
+
+.about-experience-bullets li + li {
+  margin-top: 0.35rem;
 }
 
 .about-profile-card {
@@ -538,6 +575,42 @@ body {
   padding: 0.3rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.about-highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.25rem 0.1rem;
+}
+
+.about-highlight-icon {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-weight: 800;
+  margin-top: 0.1rem;
+}
+
+.about-highlight-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.35rem;
+}
+
+.about-highlight-description {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 /* System Config Admin */
@@ -702,4 +775,3 @@ body {
 .editor-preview p {
   margin-bottom: 1rem;
 }
-
