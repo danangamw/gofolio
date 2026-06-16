@@ -30,7 +30,7 @@ func (h *BlogHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]any{
-		"Title":      "Blog — Danang",
+		"Title":      "Blog — danangamw",
 		"ActiveMenu": "blog",
 		"Blogs":      blogs,
 	}

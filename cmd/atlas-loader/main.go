@@ -5,8 +5,9 @@ import (
 	"io"
 	"os"
 
-	"ariga.io/atlas-provider-gorm/gormschema"
 	"go-cms/internal/model"
+
+	"ariga.io/atlas-provider-gorm/gormschema"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 		&model.Blog{},
 		&model.Portfolio{},
 		&model.Session{},
+		&model.SysConfig{},
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load gorm schema: %v\n", err)

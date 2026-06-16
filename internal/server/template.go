@@ -67,6 +67,8 @@ func (s *Server) loadTemplates() (*TemplateRegistry, error) {
 		{"blog_form", "web/templates/admin/blog_form.html"},
 		{"portfolio_list_admin", "web/templates/admin/portfolio_list.html"},
 		{"portfolio_form", "web/templates/admin/portfolio_form.html"},
+		{"sysconfig_list", "web/templates/admin/sysconfig_list.html"},
+		{"sysconfig_form", "web/templates/admin/sysconfig_form.html"},
 	}
 
 	for _, p := range adminPages {

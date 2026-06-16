@@ -1,2 +1,4 @@
-h1:W7tljoobdqkIyLEgtmPsGs5EAKuWNGuZcHaUzUuHw0c=
+h1:SB6YEaPdGMZDcnFBqpd8MmrAfgykyQV8i05h5y5jDEc=
 20260604054242_initial_schema.sql h1:zPj7aaxc/eeQvVzcEXjg9LbM/k9x8ZSzuY+sSrvoyGM=
+20260616175007_alter_table_add_icon_on_portofolio.sql h1:SI68zTaEwWCijqmu7VlwI/VKNwtQe7sDdoAvUjkqxxs=
+20260616180951_add_sys_configs_tables.sql h1:vRHPVEntM9JIN+kVDAXX4KH1cC/v40ZN91emrq1KWt0=

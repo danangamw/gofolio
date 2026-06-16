@@ -23,7 +23,7 @@ func main() {
 	}
 
 	log.Println("Running migrations...")
-	err = db.AutoMigrate(&model.User{}, &model.Blog{}, &model.Portfolio{}, &model.Session{})
+	err = db.AutoMigrate(&model.User{}, &model.Blog{}, &model.Portfolio{}, &model.Session{}, &model.SysConfig{})
 	if err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}

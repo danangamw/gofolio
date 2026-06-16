@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"log"
@@ -25,6 +26,7 @@ type Server struct {
 	userRepo      *repository.UserRepository
 	blogRepo      *repository.BlogRepository
 	portfolioRepo *repository.PortfolioRepository
+	sysConfigRepo *repository.SysConfigRepository
 	tmpl          *TemplateRegistry // parsed once at startup
 }
 
@@ -43,6 +45,11 @@ func NewServer(
 		userRepo:      repository.NewUserRepository(db.GetDB()),
 		blogRepo:      repository.NewBlogRepository(db.GetDB()),
 		portfolioRepo: repository.NewPortfolioRepository(db.GetDB()),
+		sysConfigRepo: repository.NewSysConfigRepository(db.GetDB()),
+	}
+
+	if err := s.sysConfigRepo.SeedDefaults(context.Background()); err != nil {
+		log.Printf("WARN: failed to seed system configs (continuing with fallback content): %v", err)
 	}
 
 	if cfg.UploadStorage == "s3" {

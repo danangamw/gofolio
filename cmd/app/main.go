@@ -83,7 +83,7 @@ func main() {
 
 	go gracefulShutdown(srv, done)
 
-	logger.Info(ctx, "Server running on :%s (env: %s)", cfg.AppPort, cfg.AppEnv)
+	logger.Info(ctx, fmt.Sprintf("Server running on :%s (env: %s)", cfg.AppPort, cfg.AppEnv))
 	err = srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("server error: %s", err))

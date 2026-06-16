@@ -16,9 +16,10 @@
     <header style="position:fixed;top:0;left:0;right:0;height:4rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;z-index:100;">
         <span style="font-weight:800;font-size:1.1rem;">CMS Admin</span>
         <nav style="margin-left:2rem;display:flex;gap:1.5rem;">
-            <a href="/admin" class="nav-link">Dashboard</a>
-            <a href="/admin/blogs" class="nav-link">Blog</a>
-            <a href="/admin/portfolios" class="nav-link">Portfolio</a>
+            <a href="/admin" class="nav-link {{ if eq .ActiveMenu "dashboard" }}active{{ end }}">Dashboard</a>
+            <a href="/admin/blogs" class="nav-link {{ if eq .ActiveMenu "blog" }}active{{ end }}">Blog</a>
+            <a href="/admin/portfolios" class="nav-link {{ if eq .ActiveMenu "portfolio" }}active{{ end }}">Portfolio</a>
+            <a href="/admin/sysconfigs" class="nav-link {{ if eq .ActiveMenu "sysconfig" }}active{{ end }}">Settings</a>
         </nav>
         <form action="/admin/logout" method="POST" style="margin-left:auto;">
             <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">

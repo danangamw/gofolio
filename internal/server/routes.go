@@ -66,7 +66,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	homeH := publichandler.NewHomeHandler(tmpl, s.blogRepo, s.portfolioRepo)
 	portH := publichandler.NewPortfolioHandler(tmpl, s.portfolioRepo)
 	blogH := publichandler.NewBlogHandler(tmpl, s.blogRepo)
-	aboutH := publichandler.NewAboutHandler(tmpl)
+	aboutH := publichandler.NewAboutHandler(tmpl, s.sysConfigRepo)
 
 	r.Get("/", homeH.Index)
 	r.Get("/portfolio", portH.List)
@@ -87,9 +87,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	uploadSvc := service.NewUploadService(s.cfg)
 	uploadH := adminhandler.NewUploadHandler(uploadSvc)
 
-	adminDashH := adminhandler.NewDashboardHandler(tmpl, s.blogRepo, s.portfolioRepo)
+	adminDashH := adminhandler.NewDashboardHandler(tmpl, s.blogRepo, s.portfolioRepo, s.sysConfigRepo)
 	adminBlogH := adminhandler.NewAdminBlogHandler(tmpl, s.blogRepo)
 	adminPortH := adminhandler.NewAdminPortfolioHandler(tmpl, s.portfolioRepo)
+	adminSysConfigH := adminhandler.NewAdminSysConfigHandler(tmpl, s.sysConfigRepo)
 
 	// ── Admin routes ─────────────────────────────────────────────────────────
 	r.Route("/admin", func(r chi.Router) {
@@ -109,6 +110,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/blogs/edit/{slug}", adminBlogH.Edit)
 		r.Post("/blogs/edit/{slug}", adminBlogH.Update)
 		r.Post("/blogs/delete/{slug}", adminBlogH.Delete)
+
+		// System settings administration routes
+		r.Get("/sysconfigs", adminSysConfigH.List)
+		r.Get("/sysconfigs/new", adminSysConfigH.New)
+		r.Post("/sysconfigs/new", adminSysConfigH.Create)
+		r.Get("/sysconfigs/edit/{key}", adminSysConfigH.Edit)
+		r.Post("/sysconfigs/edit/{key}", adminSysConfigH.Update)
+		r.Post("/sysconfigs/delete/{key}", adminSysConfigH.Delete)
 
 		// Portfolio administration routes
 		r.Get("/portfolios", adminPortH.List)

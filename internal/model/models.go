@@ -14,26 +14,26 @@ import (
 
 // User represents the users table in database.
 type User struct {
-	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Username     string         `gorm:"type:varchar(100);uniqueIndex;not null"`
-	PasswordHash string         `gorm:"type:text;not null"`
-	CreatedAt    time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
-	Sessions     []Session      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	Username     string    `gorm:"type:varchar(100);uniqueIndex;not null"`
+	PasswordHash string    `gorm:"type:text;not null"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
+	Sessions     []Session `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 // Blog represents the blogs table in database.
 type Blog struct {
-	ID          uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Title       string         `gorm:"type:varchar(255);not null"`
-	Slug        string         `gorm:"type:varchar(255);uniqueIndex;not null"`
-	Category    string         `gorm:"type:varchar(100);default:'';not null"`
-	Content     string         `gorm:"type:text;not null"`
-	Excerpt     string         `gorm:"type:text"`
-	Status      string         `gorm:"type:varchar(20);default:'draft';not null"` // 'draft' or 'published'
-	PublishedAt *time.Time     `gorm:"default:null"`
-	CreatedAt   time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt   time.Time      `gorm:"autoUpdateTime"`
+	ID          uuid.UUID  `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	Title       string     `gorm:"type:varchar(255);not null"`
+	Slug        string     `gorm:"type:varchar(255);uniqueIndex;not null"`
+	Category    string     `gorm:"type:varchar(100);default:'';not null"`
+	Content     string     `gorm:"type:text;not null"`
+	Excerpt     string     `gorm:"type:text"`
+	Status      string     `gorm:"type:varchar(20);default:'draft';not null"` // 'draft' or 'published'
+	PublishedAt *time.Time `gorm:"default:null"`
+	CreatedAt   time.Time  `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time  `gorm:"autoUpdateTime"`
 }
 
 // Portfolio represents the portfolios table in database.
@@ -49,6 +49,20 @@ type Portfolio struct {
 	SortOrder     int            `gorm:"type:integer;default:0;not null"`
 	CreatedAt     time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt     time.Time      `gorm:"autoUpdateTime"`
+}
+
+// SysConfig represents key/value settings managed from the admin panel.
+type SysConfig struct {
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	Key         string    `gorm:"type:varchar(255);uniqueIndex;not null"`
+	Name        string    `gorm:"type:varchar(255);not null"`
+	Description string    `gorm:"type:text"`
+	Value       string    `gorm:"type:text;not null"`
+	ValueType   string    `gorm:"type:varchar(20);default:'text';not null"`
+	GroupName   string    `gorm:"type:varchar(100);default:'general';not null"`
+	SortOrder   int       `gorm:"type:integer;default:0;not null"`
+	CreatedAt   time.Time `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 }
 
 // Session represents the server-side sessions table in database (fallback if Redis is not used).
@@ -82,6 +96,13 @@ func (p *Portfolio) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
+func (s *SysConfig) BeforeCreate(tx *gorm.DB) (err error) {
+	if s.ID == uuid.Nil {
+		s.ID = uuid.New()
+	}
+	return
+}
+
 // Date returns a formatted string of the publish/creation date.
 func (b Blog) Date() string {
 	if b.PublishedAt != nil {
@@ -106,5 +127,3 @@ func (b Blog) HTMLContent() template.HTML {
 func (b Blog) Author() string {
 	return "Danang"
 }
-
-

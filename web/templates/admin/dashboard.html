@@ -31,6 +31,14 @@
         </div>
 
         <div class="card stat-card">
+            <div class="stat-card-icon">⚙️</div>
+            <div>
+                <div class="stat-card-label">Settings</div>
+                <div class="stat-card-value">{{ .Stats.SysConfigCount }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card">
             <div class="stat-card-icon">🔥</div>
             <div>
                 <div class="stat-card-label">Total Views</div>
@@ -41,6 +49,25 @@
 
     <!-- Layout Split -->
     <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+        <div class="card admin-form-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1.2rem; font-weight: 800;">Site Settings</h3>
+                <a href="/admin/sysconfigs" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600;">Manage All</a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                <div style="padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--muted);">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); font-weight: 700; margin-bottom: 0.35rem;">About Content</div>
+                    <div style="font-weight: 700; margin-bottom: 0.35rem;">Editable from panel</div>
+                    <div style="color: var(--muted-foreground); font-size: 0.92rem;">Name, role, bio, skills, and social links are controlled by `sysconfig` rows.</div>
+                </div>
+                <div style="padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--muted);">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); font-weight: 700; margin-bottom: 0.35rem;">Default Values</div>
+                    <div style="font-weight: 700; margin-bottom: 0.35rem;">Seeded on startup</div>
+                    <div style="color: var(--muted-foreground); font-size: 0.92rem;">You can tweak the defaults directly without touching templates.</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Recent Blog Posts -->
         <div class="card admin-form-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">

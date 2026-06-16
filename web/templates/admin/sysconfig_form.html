@@ -1,0 +1,124 @@
+{{ define "content" }}
+<div class="admin-form-container">
+    <div style="margin-bottom: 2rem;">
+        <div class="admin-breadcrumb">
+            <a href="/admin">Dashboard</a>
+            <span>/</span>
+            <a href="/admin/sysconfigs">Settings</a>
+            <span>/</span>
+            <span style="color: var(--foreground); font-weight: 500;">{{ if .IsEdit }}Edit{{ else }}New{{ end }}</span>
+        </div>
+        <h1 class="admin-header-title" style="font-size: 2rem;">{{ if .IsEdit }}Edit Setting{{ else }}Create New Setting{{ end }}</h1>
+    </div>
+
+    <div class="card admin-form-card">
+        <form action="{{ if .IsEdit }}/admin/sysconfigs/edit/{{ .Config.Key }}{{ else }}/admin/sysconfigs/new{{ end }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+
+            <div class="form-grid-2">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="key">Key</label>
+                    {{ if .IsEdit }}
+                    <input type="text" id="key" class="form-control" value="{{ .Config.Key }}" readonly>
+                    {{ else }}
+                    <input type="text" id="key" name="key" class="form-control" placeholder="e.g. about_name" required>
+                    {{ end }}
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. About Name" value="{{ .Config.Name }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="2" style="resize: vertical;" placeholder="Short explanation of what this setting controls.">{{ .Config.Description }}</textarea>
+            </div>
+
+            <div class="config-form-switch">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="group_name">Group</label>
+                    <input type="text" id="group_name" name="group_name" class="form-control" placeholder="general, about, social" value="{{ .Config.GroupName }}" required>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="value_type">Value Type</label>
+                    <select id="value_type" name="value_type" class="form-control" required>
+                        <option value="text" {{ if eq .Config.ValueType "text" }}selected{{ end }}>Text</option>
+                        <option value="textarea" {{ if eq .Config.ValueType "textarea" }}selected{{ end }}>Textarea</option>
+                        <option value="url" {{ if eq .Config.ValueType "url" }}selected{{ end }}>URL</option>
+                        <option value="json" {{ if eq .Config.ValueType "json" }}selected{{ end }}>JSON</option>
+                        <option value="boolean" {{ if eq .Config.ValueType "boolean" }}selected{{ end }}>Boolean</option>
+                        <option value="image" {{ if eq .Config.ValueType "image" }}selected{{ end }}>Image</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="sort_order">Sort Order</label>
+                    <input type="number" id="sort_order" name="sort_order" class="form-control" min="0" step="1" value="{{ .Config.SortOrder }}">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label" for="value">Value</label>
+
+                <input
+                    type="text"
+                    id="value_text"
+                    name="value"
+                    class="form-control"
+                    placeholder="Enter text value..."
+                    value="{{ .Config.Value }}"
+                >
+
+                <textarea
+                    id="value_textarea"
+                    name="value"
+                    class="form-control config-value-area"
+                    style="display: none;"
+                    placeholder="Enter long text or JSON value..."
+                >{{ .Config.Value }}</textarea>
+
+                <select id="value_boolean" name="value" class="form-control" style="display: none;">
+                    <option value="true" {{ if eq .Config.Value "true" }}selected{{ end }}>True</option>
+                    <option value="false" {{ if eq .Config.Value "false" }}selected{{ end }}>False</option>
+                </select>
+
+                <p style="margin-top: 0.75rem; color: var(--muted-foreground); font-size: 0.9rem;">
+                    Use JSON for arrays/objects, textarea for longer copy, and boolean for yes/no values.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <a href="/admin/sysconfigs" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ if .IsEdit }}Save Changes{{ else }}Create Setting{{ end }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const valueType = document.getElementById('value_type');
+        const valueText = document.getElementById('value_text');
+        const valueTextarea = document.getElementById('value_textarea');
+        const valueBoolean = document.getElementById('value_boolean');
+
+        function syncValueField() {
+            const selected = valueType.value;
+            const useTextarea = selected === 'textarea' || selected === 'json';
+            const useBoolean = selected === 'boolean';
+
+            valueText.style.display = useTextarea || useBoolean ? 'none' : 'block';
+            valueText.disabled = useTextarea || useBoolean;
+
+            valueTextarea.style.display = useTextarea ? 'block' : 'none';
+            valueTextarea.disabled = !useTextarea;
+
+            valueBoolean.style.display = useBoolean ? 'block' : 'none';
+            valueBoolean.disabled = !useBoolean;
+        }
+
+        valueType.addEventListener('change', syncValueField);
+        syncValueField();
+    })();
+</script>
+{{ end }}

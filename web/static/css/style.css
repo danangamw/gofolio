@@ -472,6 +472,22 @@ body {
   gap: 2rem;
 }
 
+.about-experience-item {
+  position: relative;
+}
+
+.about-experience-item::before {
+  content: "";
+  position: absolute;
+  left: -1.62rem;
+  top: 0.35rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
 .about-experience-header {
   display: flex;
   justify-content: space-between;
@@ -518,6 +534,41 @@ body {
   padding: 0.3rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+/* System Config Admin */
+.config-value-preview {
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.config-type-badge {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.68rem;
+}
+
+.config-form-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .config-form-switch {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-value-area {
+  min-height: 220px;
+  font-family: var(--font-mono);
+  line-height: 1.5;
 }
 
 /* Blog Detail Specifics */
@@ -647,7 +698,6 @@ body {
 .editor-preview p {
   margin-bottom: 1rem;
 }
-
 
 
 

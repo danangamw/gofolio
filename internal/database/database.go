@@ -114,7 +114,7 @@ func New(cfg *config.Config) Service {
 	// Run GORM AutoMigrate if configured (Optional, usually for dev)
 	if cfg.AppEnv == "development" && cfg.AppAutoMigrate {
 		log.Println("Running GORM auto-migrations...")
-		err = db.AutoMigrate(&model.User{}, &model.Blog{}, &model.Portfolio{}, &model.Session{})
+		err = db.AutoMigrate(&model.User{}, &model.Blog{}, &model.Portfolio{}, &model.SysConfig{}, &model.Session{})
 		if err != nil {
 			log.Fatalf("AutoMigration failed: %v", err)
 		}

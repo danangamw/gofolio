@@ -1,73 +1,52 @@
 {{ define "content" }}
 <div class="container" style="padding-bottom: 5rem;">
-    <!-- Page Header -->
     <header class="page-header">
-        <h1 class="page-title">About Me</h1>
-        <p class="page-subtitle">
-            Get to know me better, my background, technical expertise, and what I enjoy doing.
-        </p>
+        <h1 class="page-title">{{ .AboutTitle }}</h1>
+        <p class="page-subtitle">{{ .AboutSubtitle }}</p>
     </header>
 
     <div style="margin-top: 1rem;">
         <div class="about-split-grid">
-            <!-- Biography (Left Column) -->
             <div class="prose" style="max-width: 100%; font-size: 1.05rem;">
                 <h2>Who am I?</h2>
-                <p>
-                    Hello! My name is <strong>Danang</strong>. I am a Software Engineer specializing in backend development using <strong>Go</strong>. I love building systems that are modular, clean, well-documented, and efficient.
-                </p>
-                <p>
-                    Besides writing code, I enjoy exploring microservices architectures, database optimization, reliable automated testing, and deploying container-based systems (Docker/Kubernetes).
-                </p>
+                {{ range .BioParagraphs }}
+                <p>{{ . }}</p>
+                {{ end }}
 
+                {{ if .AboutExperiences }}
                 <h2 style="margin-top: 2rem;">Work Experience</h2>
                 <div class="about-experience-timeline">
-                    <div>
+                    {{ range .AboutExperiences }}
+                    <div class="about-experience-item">
                         <div class="about-experience-header">
-                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Senior Backend Engineer</h3>
-                            <span class="badge" style="font-size: 0.75rem;">2024 - Present</span>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">{{ .Title }}</h3>
+                            <span class="badge" style="font-size: 0.75rem;">{{ .Period }}</span>
                         </div>
-                        <div class="about-experience-company">TechCorp Indonesia</div>
-                        <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">Designed and migrated monolithic architectures to Go-based microservices, reducing API latency by 40% and handling high-throughput workloads.</p>
+                        <div class="about-experience-company">{{ .Company }}</div>
+                        <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">{{ .Description }}</p>
                     </div>
-
-                    <div>
-                        <div class="about-experience-header">
-                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Software Engineer (Backend)</h3>
-                            <span class="badge" style="font-size: 0.75rem;">2022 - 2024</span>
-                        </div>
-                        <div class="about-experience-company">Startup Hub</div>
-                        <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">Built RESTful APIs with Gin & GORM, integrated third-party payment gateways, and optimized PostgreSQL queries.</p>
-                    </div>
+                    {{ end }}
                 </div>
+                {{ end }}
             </div>
 
-            <!-- Profile & Skills (Right Column) -->
             <div style="display: flex; flex-direction: column; gap: 2.5rem;">
-                <!-- Profile Card -->
                 <div class="card about-profile-card">
-                    <div class="about-profile-avatar">D</div>
-                    <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">Danang</h3>
-                    <p style="font-size: 0.9rem; color: var(--muted-foreground); margin-bottom: 1.5rem;">Backend Developer</p>
+                    <div class="about-profile-avatar">{{ .AboutAvatar }}</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">{{ .AboutName }}</h3>
+                    <p style="font-size: 0.9rem; color: var(--muted-foreground); margin-bottom: 1.5rem;">{{ .AboutRole }}</p>
                     <div style="display: flex; justify-content: center; gap: 1rem; width: 100%;">
-                        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">GitHub</a>
-                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">LinkedIn</a>
+                        <a href="{{ .GitHubURL }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">GitHub</a>
+                        <a href="{{ .LinkedInURL }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1;">LinkedIn</a>
                     </div>
                 </div>
 
-                <!-- Tech Stack & Skills -->
                 <div>
                     <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">Technical Skills</h3>
                     <div class="about-skills-container">
-                        <span class="badge about-skill-badge">Go (Golang)</span>
-                        <span class="badge about-skill-badge">PostgreSQL</span>
-                        <span class="badge about-skill-badge">Redis</span>
-                        <span class="badge about-skill-badge">Docker</span>
-                        <span class="badge about-skill-badge">Kubernetes</span>
-                        <span class="badge about-skill-badge">gRPC / Protobuf</span>
-                        <span class="badge about-skill-badge">GraphQL</span>
-                        <span class="badge about-skill-badge">Git</span>
-                        <span class="badge about-skill-badge">HTML / CSS</span>
+                        {{ range .AboutSkills }}
+                        <span class="badge about-skill-badge">{{ . }}</span>
+                        {{ end }}
                     </div>
                 </div>
             </div>

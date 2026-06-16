@@ -26,7 +26,7 @@ func (h *PortfolioHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]any{
-		"Title":      "Portfolio — Danang",
+		"Title":      "Portfolio — danangamw",
 		"ActiveMenu": "portfolio",
 		"Portfolios": portfolios,
 	}

@@ -1,0 +1,73 @@
+{{ define "content" }}
+<div class="admin-container">
+    <div class="admin-header">
+        <div>
+            <h1 class="admin-header-title">Manage Site Settings</h1>
+            <p class="admin-header-subtitle">Edit global content like About page data, branding, and shared site text.</p>
+        </div>
+        <a href="/admin/sysconfigs/new" class="btn btn-primary">Add Setting</a>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="card stat-card">
+            <div class="stat-card-icon">⚙️</div>
+            <div>
+                <div class="stat-card-label">Total Settings</div>
+                <div class="stat-card-value">{{ len .Configs }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-card-icon">🧩</div>
+            <div>
+                <div class="stat-card-label">Groups</div>
+                <div class="stat-card-value">General + About</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card admin-form-card">
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Key</th>
+                        <th>Name</th>
+                        <th>Group</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Configs }}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--foreground); font-family: var(--font-mono); font-size: 0.86rem;">{{ .Key }}</div>
+                            <div style="color: var(--muted-foreground); font-size: 0.78rem; margin-top: 0.2rem;">{{ .Description }}</div>
+                        </td>
+                        <td style="font-weight: 600; color: var(--foreground);">{{ .Name }}</td>
+                        <td><span class="badge">{{ .GroupName }}</span></td>
+                        <td><span class="badge config-type-badge">{{ .ValueType }}</span></td>
+                        <td><div class="config-value-preview">{{ .DisplayValue }}</div></td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+                                <a href="/admin/sysconfigs/edit/{{ .Key }}" class="btn btn-outline btn-sm">Edit</a>
+                                <form action="/admin/sysconfigs/delete/{{ .Key }}" method="POST" onsubmit="return confirm('Delete this setting? Pages that depend on it will fall back to defaults.');" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--destructive); border-color: color-mix(in oklch, var(--destructive) 20%, var(--border));">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="6" style="padding: 2rem; text-align: center; color: var(--muted-foreground);">No settings found.</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{ end }}
