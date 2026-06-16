@@ -6,6 +6,18 @@
     </header>
 
     <div style="margin-top: 1rem;">
+        <div class="stats-grid" style="margin-bottom: 3rem;">
+            {{ range .ValueHighlights }}
+            <div class="card stat-card" style="align-items: flex-start;">
+                <div class="stat-card-icon" style="width: 2.75rem; height: 2.75rem; font-size: 1.25rem;">✓</div>
+                <div>
+                    <div class="stat-card-label" style="margin-bottom: 0.35rem;">{{ .Title }}</div>
+                    <div style="color: var(--muted-foreground); line-height: 1.6;">{{ .Description }}</div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+
         <div class="about-split-grid">
             <div class="prose" style="max-width: 100%; font-size: 1.05rem;">
                 <h2>Who am I?</h2>
@@ -23,14 +35,22 @@
                             <span class="badge" style="font-size: 0.75rem;">{{ .Period }}</span>
                         </div>
                         <div class="about-experience-company">{{ .Company }}</div>
+                        {{ if .Bullets }}
+                        <ul style="margin: 0; padding-left: 1.2rem; color: var(--muted-foreground); font-size: 0.95rem;">
+                            {{ range .Bullets }}
+                            <li style="margin-bottom: 0.4rem;">{{ . }}</li>
+                            {{ end }}
+                        </ul>
+                        {{ else }}
                         <p style="margin: 0; font-size: 0.95rem; color: var(--muted-foreground);">{{ .Description }}</p>
+                        {{ end }}
                     </div>
                     {{ end }}
                 </div>
                 {{ end }}
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 2.5rem; width: 100%;">
                 <div class="card about-profile-card">
                     <div class="about-profile-avatar">{{ .AboutAvatar }}</div>
                     <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">{{ .AboutName }}</h3>

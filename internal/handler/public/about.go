@@ -59,10 +59,18 @@ func (h *AboutHandler) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 type aboutExperience struct {
-	Title       string `json:"title"`
-	Company     string `json:"company"`
-	Period      string `json:"period"`
-	Description string `json:"description"`
+	Title       string   `json:"title"`
+	Company     string   `json:"company"`
+	Period      string   `json:"period"`
+	Description string   `json:"description"`
+	Bullets     []string `json:"bullets,omitempty"`
+}
+
+type aboutExperienceRaw struct {
+	Title       string          `json:"title"`
+	Company     string          `json:"company"`
+	Period      string          `json:"period"`
+	Description json.RawMessage `json:"description"`
 }
 
 func (h *AboutHandler) defaultAboutData() map[string]any {
@@ -70,7 +78,7 @@ func (h *AboutHandler) defaultAboutData() map[string]any {
 		"Title":         "About Me — danangamw",
 		"ActiveMenu":    "about",
 		"AboutTitle":    "About Me",
-		"AboutSubtitle": "Get to know me better, my background, technical expertise, and what I enjoy doing.",
+		"AboutSubtitle": "A quick view of the value I bring: ownership, reliability, and the ability to turn business needs into production-ready software.",
 		"AboutName":     "Danang",
 		"AboutRole":     "Backend Developer",
 		"AboutAvatar":   "D",
@@ -101,6 +109,20 @@ func (h *AboutHandler) defaultAboutData() map[string]any {
 				Company:     "Startup Hub",
 				Period:      "2022 - 2024",
 				Description: "Built RESTful APIs with Gin & GORM, integrated third-party payment gateways, and optimized PostgreSQL queries.",
+			},
+		},
+		"ValueHighlights": []map[string]string{
+			{
+				"Title":       "End-to-end ownership",
+				"Description": "I can take a feature from requirements and database design through API implementation, deployment, and production support.",
+			},
+			{
+				"Title":       "Reliable delivery",
+				"Description": "I focus on systems that are stable, maintainable, and easy for teams to keep improving after launch.",
+			},
+			{
+				"Title":       "Business impact",
+				"Description": "I optimize for outcomes such as lower latency, fewer manual steps, better data integrity, and smoother operations.",
 			},
 		},
 		"GitHubURL":   "https://github.com",
@@ -138,9 +160,39 @@ func parseExperiences(raw string) []aboutExperience {
 	if raw == "" {
 		return nil
 	}
-	var experiences []aboutExperience
-	if err := json.Unmarshal([]byte(raw), &experiences); err == nil {
-		return experiences
+	var items []aboutExperienceRaw
+
+	if err := json.Unmarshal([]byte(raw), &items); err != nil {
+		var wrapped struct {
+			AboutExperiences []aboutExperienceRaw `json:"about_experiences"`
+		}
+		if err := json.Unmarshal([]byte(raw), &wrapped); err != nil {
+			return nil
+		}
+		items = wrapped.AboutExperiences
 	}
-	return nil
+
+	experiences := make([]aboutExperience, 0, len(items))
+	for _, item := range items {
+		exp := aboutExperience{
+			Title:   item.Title,
+			Company: item.Company,
+			Period:  item.Period,
+		}
+
+		if len(item.Description) > 0 {
+			var desc string
+			if err := json.Unmarshal(item.Description, &desc); err == nil {
+				exp.Description = desc
+			} else {
+				var bullets []string
+				if err := json.Unmarshal(item.Description, &bullets); err == nil {
+					exp.Bullets = bullets
+				}
+			}
+		}
+
+		experiences = append(experiences, exp)
+	}
+	return experiences
 }

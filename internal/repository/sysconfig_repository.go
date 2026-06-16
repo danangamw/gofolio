@@ -69,10 +69,13 @@ func (r *SysConfigRepository) FindByKeys(ctx context.Context, keys []string) (ma
 	}
 
 	var configs []dto.SysConfigResponse
-	if err := r.db.WithContext(ctx).
-		Where("key IN ?", keys).
-		Order("group_name ASC, sort_order ASC, created_at DESC").
-		Find(&configs).Error; err != nil {
+	query := `
+		SELECT id, key, name, description, value, value_type, group_name, sort_order, created_at, updated_at
+		FROM sys_configs
+		WHERE key IN ?
+		ORDER BY group_name ASC, sort_order ASC, created_at DESC
+	`
+	if err := r.db.WithContext(ctx).Raw(query, keys).Scan(&configs).Error; err != nil {
 		return nil, fmt.Errorf("sysconfig repo: find by keys: %w", err)
 	}
 
