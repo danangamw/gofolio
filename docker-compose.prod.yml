@@ -1,0 +1,15 @@
+services:
+  app:
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE in .env}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-8085}:${APP_PORT:-8085}"
+    volumes:
+      - uploads:/app/upload
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  uploads:
